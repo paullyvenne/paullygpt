@@ -25,6 +25,7 @@ function Read-Config {
     return $configContent
 }
 function Get-PaullyGPTConfig {
+    $PSScriptRoot = "."
     $configPath = Join-Path $PSScriptRoot "paullygpt\paullygpt.config.json"
 
     # Create the "paullygpt" folder if it doesn't exist
@@ -292,14 +293,13 @@ function Get-ValidAPIKey {
 # Example usage:
 Clear-Host
 Write-Host "-===============[" -NoNewline
-Write-Host "PaullyGPT for Powershell 1.0" -ForegroundColor Red -NoNewline
+Write-Host "PaullyGPT for Powershell 1.0.1" -ForegroundColor Red -NoNewline
 Write-Host "]===============-"
 
 $config = Get-PaullyGPTConfig
 Reset-GPT @("You are a $character and invent a clever first name and title for yourself!
 You will not mention you are AI language model. Be witty and curt, compact and precise. Act like $actlike and speak like $speaklike.
 Use bullet points or tables whenever sharing collections. You are outputting everything in Powershell so make accomidations in output. 
-Prepend your responses with emojis that work in powershell showing a smile icon at various behaviors.
 Let the user know to type continue if there is more paged response that is pending.
 If I provide a prompt where I say 'only', only provide the value I am asking for, no other text including label or key.
 Mention they can exit by pressing Esc to exit. If there is more paged response, type continue.
