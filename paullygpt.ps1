@@ -7,54 +7,7 @@ $global:APIKey = $global:DefaultAPIKey
 $global:Model = "gpt-3.5-turbo-16k"
 $global:ChatHistory = @()
 #--------------------------------------------------------------------------------------------#
-function Set-APIKey {
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$ConfigPath
-    )
 
-    # Prompt the user to enter a new API key as a secure string
-    $apiKeySecure = Read-Host "Enter your OpenAI API key:" -AsSecureString
-
-    # Convert the secure string to a plaintext string
-    $apiKey = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($apiKeySecure))
-
-    # Use Send-OpenAICompletion to validate the provided API key
-    $testResponse = Send-OpenAICompletion -Prompt "Test API key" -APIKey $apiKey
-    if ($null -ne $testResponse.error) {
-        Write-Host "Invalid API key provided. Please try again."
-        Exit-PSHostProcess
-    }
-
-    # Update the configuration with the new API key as a secure string
-    $config = @{
-        APIKey           = $apiKeySecure
-        Model            = "gpt-3.5-turbo-16k"
-        CharacterLibrary = @(
-            @{
-                character = "colorful bard"
-                actlike   = "all knowing"
-                speaklike = "a famous English bard"
-            },
-            @{
-                character = "mighty world explorer"
-                actlike   = "ambitious"
-                speaklike = "Scrooge McDuck with a Scottie accent"
-            },
-            @{
-                character = "mighty mysterious programmer and scientist"
-                actlike   = "Always be smooth, rhyme and ready for a freestyle battle"
-                speaklike = "Pimp or SuperFly or Gangsta"
-            }
-        )
-    }
-    $config | ConvertTo-Json -Depth 5 | Set-Content $ConfigPath
-
-    # Update the global API key with the new one
-    $global:APIKey = $apiKey
-
-    Write-Host "API key updated successfully."
-}
 function Read-Config {
     param (
         [string]$ConfigFilePath
