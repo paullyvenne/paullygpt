@@ -4,7 +4,7 @@ A flavor of ChatGPT powered by PowerShell.
 ## Features
 * Fast and Easy to Use ChatGPT in a Powershell console.
 * Autosaves Conversation Transscripts to local text logs
-* Enter OpenAI API and begin right away
+* Enter your OpenAI API Key and begin right away
 * Useful Text-To-Speech Audio
 
 ## Coming Soon
