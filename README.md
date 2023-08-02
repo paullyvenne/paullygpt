@@ -14,7 +14,7 @@ A flavor of ChatGPT powered by PowerShell.
 * Workflows/Processes
 * SVG graphical output
    
-## Note:
+! Note:
 Requires an openAi API subscription key, that will be saved when first loaded into a PaullyGPT.config.json file.
 
 ## Instructions
@@ -23,3 +23,12 @@ Requires an openAi API subscription key, that will be saved when first loaded in
 2. If required, right-click on the paullygpt.bat and check the UNBLOCK checkbox on the bottom right of the dialog window to bypass the signed-executable checking. This bat file simply calls powershells and launches the ps1 script.
 3. The first time it is run, you will be required to enter a valid OPENAI API KEY.
 4. While using PaullyGPT, it will create a subfolder to contain transcript logs of the session as well as a config file containing the APIKEY to access OPENAI for future user.
+
+## More Information
+https://github.com/paullyvenne/paullygpt
+
+## EXE Binary Version (Win-PS2EXE)
+https://www.dropbox.com/scl/fi/jkb85ndxqxirz0mejmlrc/paullygpt.v1.0.2.rar?rlkey=uzx3xvpl1b48vao46qu8733n0&dl=0
+
+! Note:
+EXEs created with WIN-PS2EXE maybe generate false malware positives. If this is a problem please adjust your Windows Defender exclusions or use the Powershell script version. 
