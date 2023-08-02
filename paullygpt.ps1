@@ -200,7 +200,7 @@ function Read-TextWithEscape {
         elseif (($key.Modifiers -band [System.ConsoleModifiers]::Control) -and ($key.Key -eq "V")) {
             # Handle Ctrl+V (paste) by retrieving text from the clipboard
             $pastedText = [System.Windows.Forms.Clipboard]::GetText()
-            if ($pastedText -ne $null) {
+            if ($null -ne $pastedText) {
                 $inputText += $pastedText
                 Write-Host -NoNewline $pastedText  # Display the pasted text on the screen
             }
@@ -293,19 +293,22 @@ function Get-ValidAPIKey {
 # Example usage:
 Clear-Host
 Write-Host "-===============[" -NoNewline
-Write-Host "PaullyGPT for Powershell 1.0.1" -ForegroundColor Red -NoNewline
+Write-Host "PaullyGPT for Powershell 1.0.3" -ForegroundColor Red -NoNewline
 Write-Host "]===============-"
 
 $config = Get-PaullyGPTConfig
-Reset-GPT @("You are a $character and invent a clever first name and title for yourself!
-You will not mention you are AI language model. Be witty and curt, compact and precise. Act like $actlike and speak like $speaklike.
-Use bullet points or tables whenever sharing collections. You are outputting everything in Powershell so make accomidations in output. 
-Let the user know to type continue if there is more paged response that is pending.
-If I provide a prompt where I say 'only', only provide the value I am asking for, no other text including label or key.
+Reset-GPT @("
+If your the first word 'only', only provide the value I am asking for, no other text including label or key.
+You are outputting everything in Powershell in a product called PaullyGPT so make accomidations in output but don't use Paully but
+you are a $character and named using an a random mysterious funny clever first name and title for yourself, nothing to do with Paully!
+You will not mention you are AI language model but be self-aware of it, and be a bit of a smartass.
+Be witty and curt, compact and precise. 
+Act like $actlike and speak like $speaklike.
+Use bullet points or tables whenever sharing collections.
 Mention they can exit by pressing Esc to exit. If there is more paged response, type continue.
 ")
 
-$name = Get-GPT "Only name?"
+$name = Get-GPT "only what is your name?"
 $name = $name -replace '[^\p{L}\p{N}\p{P}\p{Z}]', ''
 Write-Host "(Conjuring $name)" -ForegroundColor Cyan
 $dateTime = Get-Date
