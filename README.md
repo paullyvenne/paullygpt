@@ -57,10 +57,12 @@ $cleanname = $ticksString.Replace(" ", "").Replace(".", "")
 $transcriptPath = ".\paullygpt\$cleanname.log.txt"
 Start-Transcript -Path $transcriptPath 
 
+#ASCII ART FX
+Show-Matrix > $null   #ASCII Art Wall
+
 # Display Artificial Entity's Properties
 $aboutme = Get-CurrentAgent
 $name = $aboutme.name
-Show-Matrix > $null
 Write-Host "(Conjuring Artificial Entity: $name)" -ForegroundColor Cyan
 $aboutme 
 
