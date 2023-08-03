@@ -1,3 +1,20 @@
+Import-Module .\OpenAIModule.psm1
+
+function Get-Agent {
+    $retries = 0
+    $jsonRegex = '(?s)```json(.*?)```'
+    $s2 = $null
+    do {
+        $s1 = Get-GPT "a json with properties about yourself"
+        if ($null -ne ($s1 | ConvertFrom-Json)) {
+            $s2 = $s1 
+        } else {
+            $s2 = $s1 | Select-String -Pattern $jsonRegex | ForEach-Object { $_.Matches.Groups[1].Value }
+        }
+        $retries +=1
+    } until (($retries > 5) -or ($null -ne $s2e -or $s2.Trim().Length -gt 0))
+    return $s2 | ConvertFrom-Json
+}
 function Read-TextWithEscape {
     param (
         [string]$prompt

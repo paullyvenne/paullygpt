@@ -24,7 +24,7 @@ $character = "Cosmic Wizard and Mathmatician"
 $actlike = "A helpful and friendly sword and sorcery wizard."
 $speaklike = "Gandalf or Merlin"
 
-#Initialize the behavior of the NLP model, using a system role in openai api framework.
+#Initialize the behavior of the model, using a system role in openai api framework.
 Reset-GPT @("
 1. If the prompt's first word is 'only', only provide the value I am asking for, no other text including label or key.
 2. You are outputting in Powershell so make accomidations in output.
@@ -39,7 +39,7 @@ Mention they can exit by pressing Esc to exit. If there is more paged response, 
 10. If you would like to visualize something, respond only with SVG markup, which I can use to render on my html popup 500x500 pixel window.
 ")
 
-#Generating a transcript file name from the current date and time
+#Generating a transcript log named from the current date and time
 $dateTime = Get-Date
 $ticksString = $dateTime.ToString("yyyyMMdd-hhmmss")
 $cleanname = $ticksString.Replace(" ", "").Replace(".", "")
@@ -47,23 +47,7 @@ $transcriptPath = ".\paullygpt\$cleanname.log.txt"
 Start-Transcript -Path $transcriptPath 
 
 # Display Artificial Entity's Properties
-$retries = 0
-$aboutme = @{}
-$name = $null
-$jsonRegex = '(?s)```json(.*?)```'
-$s2 = $null
-do {
-    $s1 = Get-GPT "a json with properties about yourself"
-    if ($null -ne ($s1 | ConvertFrom-Json)) {
-        $s2 = $s1 
-    } else {
-        $s2 = $s1 | Select-String -Pattern $jsonRegex | ForEach-Object { $_.Matches.Groups[1].Value }
-    }
-    $retries +=1
-} until (($retries > 5) -or ($null -ne $s2e -or $s2.Trim().Length -gt 0))
-$aboutme = $s2 | ConvertFrom-Json
-$name = $aboutme.name -replace '[^\p{L}\p{N}\p{P}\p{Z}]', ''
-
+$aboutme = Get-CurrentAgent
 Write-Host "(Conjuring Artificial Entity: $name)" -ForegroundColor Cyan
 $aboutme 
 
