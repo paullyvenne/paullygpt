@@ -291,14 +291,19 @@ function Get-ValidAPIKey {
 }
 #--------------------------------------------------------------------------------------------#
 # Example usage:
+#--------------------------------------------------------------------------------------------#
+
 Clear-Host
 Write-Host "-===============[" -NoNewline
 Write-Host "PaullyGPT for Powershell 1.0.4" -ForegroundColor Red -NoNewline
 Write-Host "]===============-"
 
+#Load the config file or initialize if needed
 $config = Get-PaullyGPTConfig
+
+#Initialize the behavior of the NLP model, using a system role in openai api framework.
 Reset-GPT @("
-If the prompt's first word 'only', only provide the value I am asking for, no other text including label or key.
+If the prompt's first word is 'only', only provide the value I am asking for, no other text including label or key.
 You are outputting in Powershell so make accomidations in output.
 You are a $character and named using an a random mysterious funny clever male $actlikefirst name and title for yourself.
 Do not name or mention you are an AI model or that you're an AI Assistant but be self-aware of it in a funny way.
@@ -308,32 +313,33 @@ Use bullet points or tables whenever sharing collections.
 Mention they can exit by pressing Esc to exit. If there is more paged response, type continue.
 ")
 
+#Generating a transcript file name from the current date and time
 $dateTime = Get-Date
 $ticksString = $dateTime.ToString("yyyyMMdd-hhmmss")
 $cleanname = $ticksString.Replace(" ", "").Replace(".", "")
 $transcriptPath = ".\paullygpt\$cleanname.log.txt"
 Start-Transcript -Path $transcriptPath 
 
+# Display Artificial Entity's Properties
 $aboutme = Get-GPT "a json with properties about yourself" | ConvertFrom-Json
 $name = $aboutme.name -replace '[^\p{L}\p{N}\p{P}\p{Z}]', ''
 Write-Host "(Conjuring Artificial Entity: $name)" -ForegroundColor Cyan
 $aboutme 
-# $properties = $aboutme | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name
-# $bulletPoints = foreach ($prop in $properties) {
-#     "- $prop : $($aboutme | Select-Object -ExpandProperty $prop)`n"
-# }
+
+#Begin the conversation loop
 $myprompt = "Hello, please introduce yourself and greet me and ask me what kind of specialization do you need help with?"
-while ($null -ne $myprompt) {
-    $answer = Get-GPT $myprompt
-    Write-Host "`n$answer`n" -ForegroundColor Green
-    SpeakAsync $answer 
-    $myprompt = Read-TextWithEscape "⚡(Esc to exit)⚡Your Response =>> "
-    if ($null -eq $myprompt) {
-        $global:APIKey = $null
-        $bybye = Get-GPTQuiet "Goodbye for now! Short and memorable goodbye."
-        Write-Host `n($bybye)
-        SpeakAsync $bybye
-        Stop-Transcript 
+while ($null -ne $myprompt) {                                                              #while prompt is not null, when escape is pressed
+    $answer = Get-GPT $myprompt                                                                 #extract into variable $answer to reuse
+    Write-Host "`n$answer`n" -ForegroundColor Green                                             #display $answer to screen
+    SpeakAsync $answer                                                                          #speak $answer (todo: async not working)
+    $myprompt = Read-TextWithEscape "⚡(Esc to exit)⚡Your Response =>> "                      #display prompt, catch escape key to exit
+    if ($null -eq $myprompt) {                                                                  #if prompt is null, exit                      
+        $global:APIKey = $null                                                                      #clear API key
+        $goodbye = Get-GPTQuiet "Goodbye for now! Short and memorable goodbye."                       #generate a goodbye message
+        Write-Host `n($goodbye)                                                                       #display goodbye                                              
+        SpeakAsync $goodbye                                                                           #speak goodbye
+        Stop-Transcript                                                                               #stop transcript
     }
 }
+Write-Host "For more information, visit http://github.com/paullyvenne/paullygpt."               #display exit message
 Exit 1
