@@ -7,7 +7,7 @@ A flavor of ChatGPT powered by PowerShell.
 * Enter your OpenAI API Key and begin right away
 * Useful Text-To-Speech Audio
 
-## Easy to Configure and Simple methods
+## Easy to Configure and Customize
 ```powershell
 Import-Module .\ConfigurationModule.psm1
 Import-Module .\OpenAIModule.psm1
