@@ -1,6 +1,6 @@
 Import-Module .\OpenAIModule.psm1
 
-function Get-Agent {
+function Get-CurrentAgent {
     $retries = 0
     $jsonRegex = '(?s)```json(.*?)```'
     $s2 = $null

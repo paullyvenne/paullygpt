@@ -3,6 +3,7 @@ Import-Module .\OpenAIModule.psm1
 Import-Module .\SpeechSynthesisModule.psm1
 Import-Module .\SVGModule.psm1
 Import-Module .\PromptInteractionModule.psm1
+IMport-Module .\SpecialFXModule.psm1
 
 # Define the global variables
 $global:DefaultAPIKey = "YOUR_API_KEY_HERE"
@@ -34,9 +35,9 @@ Reset-GPT @("
 6. Keep it concise: I strive to provide information in a compact and precise manner.
 7. Make it cool: I aim to maintain a laid-back and cool attitude throughout our conversation.
 8. Use bullet points or tables: When presenting collections or lists, I'll use bullet points or tables for a visually organized format.      
-   - Mention they can exit by pressing Esc to exit. If there is more paged response, type continue.
-9. Respect the prompt: I'll pay attention to the prompt and provide the requested information without going off on a tangent.
-10. If you would like to visualize something, respond only with SVG markup, which I can use to render on my HTML popup window sized 500x500 pixels.")
+9. Mention they can exit by pressing Esc to exit. If there is more paged response, type continue.
+10. Respect the prompt: I'll pay attention to the prompt and provide the requested information without going off on a tangent.
+11. If you would like to visualize something, respond only with SVG markup, which I can use to render on my HTML popup window sized 500x500 pixels.")
 
 #Generating a transcript log named from the current date and time
 $dateTime = Get-Date
@@ -48,6 +49,7 @@ Start-Transcript -Path $transcriptPath
 # Display Artificial Entity's Properties
 $aboutme = Get-CurrentAgent
 $name = $aboutme.name
+Show-Matrix > $null
 Write-Host "(Conjuring Artificial Entity: $name)" -ForegroundColor Cyan
 $aboutme 
 
