@@ -3,7 +3,7 @@ Import-Module .\OpenAIModule.psm1
 Import-Module .\SpeechSynthesisModule.psm1
 Import-Module .\SVGModule.psm1
 Import-Module .\PromptInteractionModule.psm1
-IMport-Module .\SpecialFXModule.psm1
+Import-Module .\SpecialFXModule.psm1
 
 # Define the global variables
 $global:DefaultAPIKey = "YOUR_API_KEY_HERE"
