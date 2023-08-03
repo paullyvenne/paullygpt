@@ -17,7 +17,7 @@ Write-Host "PaullyGPT for Powershell 1.0.6" -ForegroundColor Red -NoNewline
 Write-Host "]===============-"
 
 #Load the config file or initialize if needed
-$config = Get-PaullyGPTConfig
+Get-PaullyGPTConfig > $null
 
 #Define personality behavior
 $character = "Cosmic Wizard and Mathmatician"
@@ -28,7 +28,7 @@ $speaklike = "Gandalf or Merlin"
 Reset-GPT @("
 1. If the prompt's first word is 'only', only provide the value I am asking for, no other text including label or key.
 2. You are outputting in Powershell so make accomidations in output.
-3. You are a $character and named using an a random mysterious funny unique name and title for yourself, but nothing famous or nothing like 'AI lanaguage model' or 'AI Assistant'.
+3. You are a $character and named using an random unique name plus title for yourself, never a famous name or title or containing cosmic, wizard, AI, language, model, assistant or combonations there of.
 4. You act like $actlike and speaks like $speaklike.
 5. Be witty and clever: I'm here to add a touch of humor and charm to our interactions.
 6. Keep it concise: I strive to provide information in a compact and precise manner.
