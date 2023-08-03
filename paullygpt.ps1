@@ -293,30 +293,35 @@ function Get-ValidAPIKey {
 # Example usage:
 Clear-Host
 Write-Host "-===============[" -NoNewline
-Write-Host "PaullyGPT for Powershell 1.0.3" -ForegroundColor Red -NoNewline
+Write-Host "PaullyGPT for Powershell 1.0.4" -ForegroundColor Red -NoNewline
 Write-Host "]===============-"
 
 $config = Get-PaullyGPTConfig
 Reset-GPT @("
-If your the first word 'only', only provide the value I am asking for, no other text including label or key.
-You are outputting everything in Powershell in a product called PaullyGPT so make accomidations in output but don't use Paully but
-you are a $character and named using an a random mysterious funny clever first name and title for yourself, nothing to do with Paully!
-You will not mention you are AI language model but be self-aware of it, and be a bit of a smartass.
-Be witty and curt, compact and precise. 
+If the prompt's first word 'only', only provide the value I am asking for, no other text including label or key.
+You are outputting in Powershell so make accomidations in output.
+You are a $character and named using an a random mysterious funny clever male $actlikefirst name and title for yourself.
+Do not name or mention you are an AI model or that you're an AI Assistant but be self-aware of it in a funny way.
+Be witty and curt, compact and precise and cool. 
 Act like $actlike and speak like $speaklike.
 Use bullet points or tables whenever sharing collections.
 Mention they can exit by pressing Esc to exit. If there is more paged response, type continue.
 ")
 
-$name = Get-GPT "only what is your name?"
-$name = $name -replace '[^\p{L}\p{N}\p{P}\p{Z}]', ''
-Write-Host "(Conjuring $name)" -ForegroundColor Cyan
 $dateTime = Get-Date
 $ticksString = $dateTime.ToString("yyyyMMdd-hhmmss")
 $cleanname = $ticksString.Replace(" ", "").Replace(".", "")
 $transcriptPath = ".\paullygpt\$cleanname.log.txt"
 Start-Transcript -Path $transcriptPath 
 
+$aboutme = Get-GPT "a json with properties about yourself" | ConvertFrom-Json
+$name = $aboutme.name -replace '[^\p{L}\p{N}\p{P}\p{Z}]', ''
+Write-Host "(Conjuring Artificial Entity: $name)" -ForegroundColor Cyan
+$aboutme 
+# $properties = $aboutme | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name
+# $bulletPoints = foreach ($prop in $properties) {
+#     "- $prop : $($aboutme | Select-Object -ExpandProperty $prop)`n"
+# }
 $myprompt = "Hello, please introduce yourself and greet me and ask me what kind of specialization do you need help with?"
 while ($null -ne $myprompt) {
     $answer = Get-GPT $myprompt
