@@ -2,7 +2,7 @@ $Host.UI.RawUI.BackgroundColor = "Black"
 $Host.UI.RawUI.ForegroundColor = "Green"
 $matrixChars = @('█', '▓', '▒', '░', ' ')
 
-function Show-Matrix {
+function ShowMatrix {
     # dynamaically set to window width
     $MAX = $Host.UI.RawUI.WindowSize.Width 
 

@@ -47,7 +47,7 @@ $transcriptPath = ".\paullygpt\$cleanname.log.txt"
 Start-Transcript -Path $transcriptPath 
 
 #ASCII Art Wall
-Show-Matrix > $null
+ShowMatrix > $null
 
 # Display Artificial Entity's Properties
 $aboutme = Get-CurrentAgent
