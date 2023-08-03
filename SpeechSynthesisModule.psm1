@@ -15,7 +15,7 @@ function CancelSpeechSynthesis() {
         return $false
     }
 }
-function Get-Voice-List {
+function GetVoiceList {
     $voices = $synthesizer.GetInstalledVoices().VoiceInfo
 
     Write-Host "Available voices:"
