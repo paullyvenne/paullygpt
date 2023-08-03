@@ -3,7 +3,7 @@ Import-Module .\OpenAIModule.psm1
 Import-Module .\SpeechSynthesisModule.psm1
 Import-Module .\SVGModule.psm1
 Import-Module .\PromptInteractionModule.psm1
-IMport-Module .\SpecialFXModule.psm1
+Import-Module .\SpecialFXModule.psm1
 
 # Define the global variables
 $global:DefaultAPIKey = "YOUR_API_KEY_HERE"
@@ -46,10 +46,12 @@ $cleanname = $ticksString.Replace(" ", "").Replace(".", "")
 $transcriptPath = ".\paullygpt\$cleanname.log.txt"
 Start-Transcript -Path $transcriptPath 
 
+#ASCII Art Wall
+Show-Matrix > $null
+
 # Display Artificial Entity's Properties
 $aboutme = Get-CurrentAgent
 $name = $aboutme.name
-Show-Matrix > $null
 Write-Host "(Conjuring Artificial Entity: $name)" -ForegroundColor Cyan
 $aboutme 
 
