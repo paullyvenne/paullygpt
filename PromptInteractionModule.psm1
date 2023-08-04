@@ -1,5 +1,7 @@
 Import-Module .\OpenAIModule.psm1
 
+$global:speechEnabled = $true
+
 function Get-CurrentAgent {
     $retries = 0
     $jsonRegex = '(?s)```json(.*?)```'
@@ -55,6 +57,10 @@ function Read-TextWithEscape {
                 $inputText += $pastedText
                 Write-Host -NoNewline $pastedText  # Display the pasted text on the screen
             }
+        }
+        elseif (($key.Modifiers -band [System.ConsoleModifiers]::Control) -and ($key.Key -eq "T")) {
+            # Handle Ctrl+V (paste) by retrieving text from the clipboard
+            $global:speechEnabled = -not $global:speechEnabled 
         }
         else {
             # Add the pressed character to the inputText

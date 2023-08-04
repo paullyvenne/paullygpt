@@ -1,8 +1,8 @@
 Add-Type -AssemblyName System.Speech
 Add-Type -AssemblyName System.Windows.Forms
 
+$global:speechEnabled = $true
 $global:speechSynthesizer = $null
-
 function IsSynthesizerSpeaking() {
     return $global:speechSynthesizer.State -eq [System.Speech.Synthesis.SynthesizerState]::Speaking
 }
@@ -25,6 +25,10 @@ function GetVoiceList {
 }
 function SpeakAsync {
     param([string]$text)
+
+    if (-not $global:speechEnabled) {
+        return
+    }
 
     $filteredText = $text -replace '[^\p{L}\p{N}\p{P}\p{Z}]', ''
 
