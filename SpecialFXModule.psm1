@@ -4,7 +4,7 @@ function ShowMatrix {
     # $Host.UI.RawUI.ForegroundColor = "Green"
 
     $colors = @("Green", "Cyan", "Blue")
-    $matrixChars = @('█', '▓', '▒', '░', ' ')
+    $matrixChars = @([char]::ConvertFromUtf32(63), [char]::ConvertFromUtf32(63), [char]::ConvertFromUtf32(63), [char]::ConvertFromUtf32(63), ' ')
 
     # dynamaically set to window width
     $MAX = $Host.UI.RawUI.WindowSize.Width 
