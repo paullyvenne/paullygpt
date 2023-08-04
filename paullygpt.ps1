@@ -15,7 +15,7 @@ $global:ChatHistory = @()
 $ratio = 4.2
 $spaces = (" " * ($Host.UI.RawUI.WindowSize.Width / $ratio))
 
-Clear-Host
+#Clear-Host
 Write-Host "$spaces-===============[" -NoNewline
 Write-Host "PaullyGPT for Powershell 1.0.6" -ForegroundColor Red -NoNewline
 Write-Host "]===============-"
@@ -70,12 +70,12 @@ Write-Host " $spaces~~=(Conjuring Artificial Entity: $name)=~~" -ForegroundColor
 $aboutme 
 
 #Begin the conversation loop
-$myprompt = "Hello, please introduce yourself and greet me. Let them know CTRL-T will toggle mute and ask me what kind of specialization do you need help with?"
+$myprompt = "Hello, please introduce yourself and greet me and ask me what kind of specialization do you need help with?"
 while ($null -ne $myprompt) {                                                              #while prompt is not null, when escape is pressed
     $answer = Get-GPT $myprompt                                                                 #OPENAI MAGIC returned into variable => $answer to reuse
     Write-Host "`n$answer`n" -ForegroundColor Green                                             #display $answer to screen
     SpeakAsync $answer                                                                          #speak $answer (todo: async not working)
-    $myprompt = Read-TextWithEscape "[(ESC to exit) [ Your Response ]=>> "                      #display prompt, catch escape key to exit
+    $myprompt = Read-TextWithEscape "[(ESC to exit, CTRL-T to Mute) [ Your Response ]=>> "                      #display prompt, catch escape key to exit
     if ($null -eq $myprompt) {                                                                  #if prompt is null, exit                      
         $global:APIKey = $null                                                                      #clear API key
         $goodbye = Get-GPTQuiet "Goodbye for now! Short and memorable goodbye."                       #generate a goodbye message
