@@ -3,6 +3,7 @@ Import-Module .\OpenAIModule.psm1
 Import-Module .\SpeechSynthesisModule.psm1
 Import-Module .\SVGModule.psm1
 Import-Module .\PromptInteractionModule.psm1
+Import-Module .\SpecialFXModule.psm1
 
 # Define the global variables
 $global:DefaultAPIKey = "YOUR_API_KEY_HERE"
@@ -20,7 +21,7 @@ Write-Host "]===============-"
 Get-PaullyGPTConfig > $null
 
 #Define personality behavior
-$character = "Cosmic Wizard and Mathmatician"
+$character = "Cosmic Wizard and Programmer, Mathmatician, Scientist, Explorer, and Philosopher"
 $actlike = "A helpful and friendly sword and sorcery wizard."
 $speaklike = "Gandalf or Merlin"
 
@@ -44,6 +45,8 @@ $ticksString = $dateTime.ToString("yyyyMMdd-hhmmss")
 $cleanname = $ticksString.Replace(" ", "").Replace(".", "")
 $transcriptPath = ".\paullygpt\$cleanname.log.txt"
 Start-Transcript -Path $transcriptPath 
+
+ShowMatrix > $null
 
 # Display Artificial Entity's Properties
 $aboutme = Get-CurrentAgent

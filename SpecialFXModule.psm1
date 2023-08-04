@@ -1,4 +1,5 @@
 function ShowMatrix {
+    param()
     $Host.UI.RawUI.BackgroundColor = "Black"
     $Host.UI.RawUI.ForegroundColor = "Green"
     $matrixChars = @('█', '▓', '▒', '░', ' ')
