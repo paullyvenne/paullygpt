@@ -104,9 +104,3 @@ Requires an openAi API subscription key, that will be saved when first loaded in
 
 ## More Information
 https://github.com/paullyvenne/paullygpt
-
-#### EXE Binary Version (Win-PS2EXE)
-https://www.dropbox.com/scl/fi/jkb85ndxqxirz0mejmlrc/paullygpt.v1.0.2.rar?rlkey=uzx3xvpl1b48vao46qu8733n0&dl=0
-
-! Note:
-EXEs created with WIN-PS2EXE maybe generate false malware positives. If this is a problem please adjust your Windows Defender exclusions or use the Powershell script version. 
