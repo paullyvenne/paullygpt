@@ -104,3 +104,42 @@ Requires an openAi API subscription key, that will be saved when first loaded in
 
 ## More Information
 https://github.com/paullyvenne/paullygpt
+
+
+### Powershell scripts don't seem to run without windows security poping up
+
+Ah, the ever-vigilant guardians of Windows security! When you download PowerShell (.ps1) or batch (.bat/.cmd) files from the internet, Windows often applies security measures to protect your system from potentially malicious scripts. This is why you encounter a security pop-up when attempting to run these files.
+
+To address this issue, you have a few options:
+
+1. Unblock the File: Right-click on the downloaded .ps1 or .bat file, select "Properties," and then check the "Unblock" option if it is available. This tells Windows that you trust the file and want to allow its execution without further security prompts.
+
+2. Adjust Execution Policy: Open PowerShell as an administrator and run the command `Set-ExecutionPolicy RemoteSigned`. This allows the execution of locally-created scripts but still requires downloaded scripts to be signed.
+
+3. Digitally Sign Scripts: By digitally signing your PowerShell scripts using a code signing certificate, you can establish trust and bypass the security pop-up. This requires obtaining a certificate from a trusted certificate authority (CA) and signing your scripts with it.
+
+4. Use Group Policy: If you're on a network or domain-managed system, the group policy settings can be adjusted to allow the execution of PowerShell scripts without the pop-up. Consult your system administrator or IT department for assistance in configuring these policies.
+
+Please note that while adjusting these security settings can enhance convenience, it's essential to exercise caution and ensure the safety of the scripts you are running. Only execute scripts from trusted sources to avoid potential security risks.
+
+### Launching Powershell Scripts from Windows 10/11 Taskbars
+
+With the transition to Windows 10 and now Windows 11, the behavior of launching PowerShell scripts from the taskbar has undergone some changes. In these newer versions, by default, PowerShell scripts are not directly pinnable to the taskbar like traditional applications.
+
+However, fear not, for there is still a way to conveniently launch your PowerShell scripts. Here's a simple workaround for you:
+
+1. Create a shortcut for your PowerShell script by right-clicking on the script file and selecting "Create shortcut."
+2. Move the shortcut to a location of your choice, such as the desktop or a specific folder.
+3. Right-click on the shortcut and select "Properties."
+4. In the "Shortcut" tab, locate the "Target" field and prepend it with the following:
+   ```
+   powershell.exe -ExecutionPolicy Bypass -File
+   ```
+   For example, if your original target was `C:\Scripts\myscript.ps1`, it should now be:
+   ```
+   powershell.exe -ExecutionPolicy Bypass -File "C:\Scripts\myscript.ps1"
+   ```
+5. Click "OK" to save the changes.
+6. Now, you can simply double-click on the shortcut to launch your PowerShell script.
+
+Alternatively, you can also create a batch file (.bat or .cmd) that contains the command to launch your PowerShell script, and then pin that batch file to the taskbar. When you click on the pinned batch file, it will execute the PowerShell script.
