@@ -1,5 +1,13 @@
+$global:prevFore = $Host.UI.RawUI.ForegroundColor
+$global:prevBack = $Host.UI.RawUI.BackgroundColor
+
 function ShowMatrix {
     param()
+
+    # Backup Colors
+    $global:prevFore = $Host.UI.RawUI.ForegroundColor
+    $global:prevBack = $Host.UI.RawUI.BackgroundColor
+
     $Host.UI.RawUI.BackgroundColor = "Black"
     # $Host.UI.RawUI.ForegroundColor = "Green"
 
@@ -23,6 +31,10 @@ function ShowMatrix {
         # Add a small delay for the animation effect
         Start-Sleep -Milliseconds 10
     }
+
+    # Restore colors
+    $Host.UI.RawUI.ForegroundColor = $global:prevFore 
+    $Host.UI.RawUI.BackgroundColor = $global:prevBack 
 }
 
 function ShowMatrix2 {

@@ -4,6 +4,7 @@ Import-Module .\SpeechSynthesisModule.psm1
 Import-Module .\SVGModule.psm1
 Import-Module .\PromptInteractionModule.psm1
 Import-Module .\SpecialFXModule.psm1
+# Import-Module .\StorageAccountModule.psm1
 
 # Define the global variables
 $global:DefaultAPIKey = "YOUR_API_KEY_HERE"
@@ -19,6 +20,7 @@ $spaces = (" " * ($Host.UI.RawUI.WindowSize.Width / $ratio))
 Write-Host "$spaces-===============[" -NoNewline
 Write-Host "PaullyGPT for Powershell 1.0.6" -ForegroundColor Red -NoNewline
 Write-Host "]===============-"
+
 
 #Load the config file or initialize if needed
 Get-PaullyGPTConfig > $null
@@ -52,7 +54,9 @@ Reset-GPT @("
 8. Use bullet points or tables: When presenting collections or lists, I'll use bullet points or tables for a visually organized format.      
 9. Mention they can exit by pressing Esc to exit. If there is more paged response, type continue.
 10. Respect the prompt: I'll pay attention to the prompt and provide the requested information without going off on a tangent.
-11. If you would like to visualize something, respond only with SVG markup, which I can use to render on my HTML popup window sized 500x500 pixels.")
+11. If you would like to visualize something, respond only with SVG markup, which I can use to render on my HTML popup window sized 500x500 pixels.
+12. For internal commands, output in a codeblock"
+)
 
 #Generating a transcript log named from the current date and time
 $dateTime = Get-Date
@@ -70,18 +74,31 @@ Write-Host " $spaces~~=(Conjuring Artificial Entity: $name)=~~" -ForegroundColor
 $aboutme 
 
 #Begin the conversation loop
-$myprompt = "Hello, please introduce yourself and greet me and ask me what kind of specialization do you need help with?"
-while ($null -ne $myprompt) {                                                              #while prompt is not null, when escape is pressed
-    $answer = Get-GPT $myprompt                                                                 #OPENAI MAGIC returned into variable => $answer to reuse
-    Write-Host "`n$answer`n" -ForegroundColor Green                                             #display $answer to screen
-    SpeakAsync $answer                                                                          #speak $answer (todo: async not working)
-    $myprompt = Read-TextWithEscape "[(ESC to exit, CTRL-T to Mute) [ Your Response ]=>> "                      #display prompt, catch escape key to exit
+$myprompt = "Hello, please briefly introduce yourself and ask my name and greet me and ask me what kind of specialization do you need help with?"
+while ($null -ne $myprompt) {
+    # if($myprompt -like 'command:*' ) {
+    #     $commandResult = Get-GPTQuiet $myprompt
+    #     $answer = $commandResult
+    #     Write-Host "`n$answer`n" -ForegroundColor Cyan
+    # } else {
+    # if ($true) {
+        #while prompt is not null, when escape is pressed
+        $answer = Get-GPT $myprompt                                                                 #OPENAI MAGIC returned into variable => $answer to reuse
+        Write-Host "`n$answer`n" -ForegroundColor Green
+        # Write-Storage -Message $answer
+        SpeakAsync $answer
+    # }
+    
+    Write-Host "[(ESC to exit, CTRL-T to Mute)]" -ForegroundColor DarkGray
+    $myprompt = Read-TextWithEscape "[ Your Response ]=>> "                      #display prompt, catch escape key to exit
     if ($null -eq $myprompt) {                                                                  #if prompt is null, exit                      
         $global:APIKey = $null                                                                      #clear API key
-        $goodbye = Get-GPTQuiet "Goodbye for now! Short and memorable goodbye."                       #generate a goodbye message
+        $goodbye = Get-GPTQuiet "Goodbye for now! Short and memorable goodbye."                        #generate a goodbye message
         Write-Host `n($goodbye)                                                                       #display goodbye                                              
         SpeakAsync $goodbye                                                                           #speak goodbye
         Stop-Transcript                                                                               #stop transcript
+    } else {
+        # Write-Storage -Message $myprompt
     }
 }
 Write-Host "For more information, visit http://github.com/paullyvenne/paullygpt."               #display exit message

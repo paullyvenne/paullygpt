@@ -1,3 +1,4 @@
+
 function Send-OpenAICompletion {
     param (
         [string]$Prompt,
@@ -6,10 +7,13 @@ function Send-OpenAICompletion {
         [string]$APIKey
     )
 
-    $global:ChatHistory += @{
+    $newMessage = @{
         role    = "user"
         content = $Prompt
     }
+
+
+    $global:ChatHistory += $newMessage 
     $body = @{
         model       = $global:Model
         messages    = $global:ChatHistory
@@ -50,7 +54,6 @@ function Send-OpenAICompletion {
         Exit 1
     }
 }
-
 function Send-OpenAICompletion2 {
     param (
         [string]$Prompt,
@@ -120,7 +123,6 @@ function Send-OpenAICompletion2 {
 
     return $result -join ' '
 }
-
 function Get-OpenAICompletion {
     param (
         [string]$Prompt,
@@ -147,7 +149,6 @@ function Get-OpenAICompletion {
     }
     return $result
 }
-
 function Reset-GPT {
     param(
         [string]$directive
@@ -170,7 +171,6 @@ function Get-GPTQuiet {
     $completion = Get-OpenAICompletion -Prompt $prompt
     return $completion
 }
-
 function Get-ValidAPIKey {
     param (
         [string]$APIKey

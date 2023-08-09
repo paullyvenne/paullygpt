@@ -1,7 +1,9 @@
+# Add a reference for clipboard functionality
+Add-Type -AssemblyName System.Windows.Forms
+
 Import-Module .\OpenAIModule.psm1
 
 $global:speechEnabled = $true
-
 function Get-CurrentAgent {
     $retries = 0
     $jsonRegex = '(?s)```json(.*?)```'
@@ -13,10 +15,11 @@ function Get-CurrentAgent {
         } else {
             $s2 = $s1 | Select-String -Pattern $jsonRegex | ForEach-Object { $_.Matches.Groups[1].Value }
         }
-        $retries +=1
-    } until (($retries > 5) -or ($null -ne $s2e -or $s2.Trim().Length -gt 0))
+        $retries += 1
+    } until (($retries > 5) -or ($null -ne $s2 -or $s2.Trim().Length -gt 0))
     return $s2 | ConvertFrom-Json
 }
+
 function Read-TextWithEscape {
     param (
         [string]$prompt
@@ -26,48 +29,76 @@ function Read-TextWithEscape {
     $inputText = ""
 
     while ($true) {
-        $key = [System.Console]::ReadKey($true)  # Read a key, with no echo to the console
+        $key = [System.Console]::ReadKey($true)
         $char = $key.KeyChar
 
-        if ($key.Key -eq "Escape") {
-            Write-Host ""
-            $confirmation = Read-Host "Do you want to exit? (Y/N)"
-            if ($confirmation -eq "Y" -or $confirmation -eq "y") {
-                return $null
+        switch ($key.Key) {
+            "Escape" {
+                Write-Host ""
+                $confirmation = Read-Host "Do you want to exit? (Y/N)"
+                if ($confirmation -like "[yY]*") { return $null }
+                else { Write-Host $prompt -ForegroundColor Red -NoNewline }
             }
-            else {
-                Write-Host $prompt -ForegroundColor Red -NoNewline
+
+            
+            "Enter" { 
+                $dateTime = Get-Date
+                $timestamp = $dateTime.ToString()
+                Write-Host "`n$timestamp ...`n" -ForegroundColor Cyan ; return $inputText 
             }
-        }
-        elseif ($key.Key -eq "Enter") {
-            Write-Host ""  # Move to the next line after pressing Enter
-            break
-        }
-        elseif ($key.Key -eq "Backspace") {
-            # Remove the last character from the inputText when the Backspace key is pressed
-            if ($inputText.Length -gt 0) {
-                $inputText = $inputText.Substring(0, $inputText.Length - 1)
-                Write-Host -NoNewline "`b `b"  # Move the cursor back and erase the character on the screen
+            
+            "Backspace" {
+                if ($inputText.Length -gt 0) {
+                    $inputText = $inputText.Substring(0, $inputText.Length - 1)
+                    Write-Host -NoNewline "`b `b"
+                }
             }
-        }
-        elseif (($key.Modifiers -band [System.ConsoleModifiers]::Control) -and ($key.Key -eq "V")) {
-            # Handle Ctrl+V (paste) by retrieving text from the clipboard
-            $pastedText = [System.Windows.Forms.Clipboard]::GetText()
-            if ($pastedText -ne $null) {
-                $inputText += $pastedText
-                Write-Host -NoNewline $pastedText  # Display the pasted text on the screen
+
+            # Clipboard paste
+            { ($key.Modifiers -band [System.ConsoleModifiers]::Control) -and ($key.Key -eq "V") } {
+                $pastedText = [System.Windows.Forms.Clipboard]::GetText()
+                if ($pastedText -ne $null) {
+                    $inputText += $pastedText
+                    Write-Host -NoNewline $pastedText
+                    Start-Sleep -Milliseconds 100
+                }
             }
-        }
-        elseif (($key.Modifiers -band [System.ConsoleModifiers]::Control) -and ($key.Key -eq "T")) {
-            # Handle Ctrl+V (paste) by retrieving text from the clipboard
-            $global:speechEnabled = -not $global:speechEnabled 
-        }
-        else {
-            # Add the pressed character to the inputText
-            $inputText += $char
-            Write-Host -NoNewline $char  # Display the character on the screen
+
+            # Toggle speech
+            { ($key.Modifiers -band [System.ConsoleModifiers]::Control) -and ($key.Key -eq "T") } {
+                $global:speechEnabled = -not $global:speechEnabled 
+            }
+
+            default {
+                $inputText += $char
+                Write-Host -NoNewline $char
+            }
         }
     }
 
     return $inputText
+}
+
+function ReadJsonFromFile {
+    param (
+        [string]$filePath
+    )
+    $json = Get-Content -Path $filePath | ConvertFrom-Json
+    return $json
+}
+
+function ReadFromFile {
+    param (
+        [string]$filePath
+    )
+    $content = Get-Content -Path $filePath
+    return $content
+}
+
+function ReadFromWeb {
+    param (
+        [string]$url
+    )
+    $response = Invoke-WebRequest -Uri $url
+    return $response.Content
 }
