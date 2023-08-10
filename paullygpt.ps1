@@ -18,7 +18,7 @@ $spaces = (" " * ($Host.UI.RawUI.WindowSize.Width / $ratio))
 
 #Clear-Host
 Write-Host "$spaces-===============[" -NoNewline
-Write-Host "PaullyGPT for Powershell 1.0.6" -ForegroundColor Red -NoNewline
+Write-Host "PaullyGPT for Powershell 1.0.7" -ForegroundColor Red -NoNewline
 Write-Host "]===============-"
 
 
