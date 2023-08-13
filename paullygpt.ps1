@@ -10,7 +10,7 @@ $enterMode = $true
 
 
 
-$global:DEBUG = $true
+$global:DEBUG = $false
 
 # Define the global variables
 $global:DefaultAPIKey = "YOUR_API_KEY_HERE"
