@@ -1,14 +1,24 @@
 # PaullyGPT
 A flavor of ChatGPT powered by PowerShell.
 
+## Introduction
+
+Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to enhance your research and interactive experiences. Powered by PowerShell, PaullyGPT seamlessly integrates with ChatGPT to provide you with a captivating conversational interface. Engage in insightful discussions, explore diverse perspectives, and unlock the vast depths of knowledge effortlessly. With PaullyGPT, you not only have access to text-based interactions but also the remarkable feature of text-to-speech functionality. Let PaullyGPT be your trusted companion on your journey of discovery, guiding you towards new horizons of knowledge and understanding. Elevate your research and interactive endeavors with the harmonious synergy of PaullyGPT and ChatGPT.
+
 ## Features
 * Fast and Easy to Use ChatGPT in a Powershell console.
 * Autosaves Conversation Transscripts to local text logs
 * Enter your OpenAI API Key and begin right away
 * Useful Text-To-Speech Audio
-* Shortcut Link to Launch included
+* example Windows shortcut Link to launch included
 
-## Easy to Configure and Customize
+## Instructions
+1. From Github, click the green CODE button to download zip file into a writable folder on a Windows compatible machine
+2. Once all files are unzipped, launch the Run PaullyGPT.lnk shortcut link to launch Powershell with -ExecutionPolicy Bypass to get running. (Note: If the shortcut fails to run the script, try to adjust the shortcut's START directory path to point to the PaullyGPT folder as needed, it might be stuck on a default value I had locally. You can modify the Start Path of the shortcut by right-clicking on and choosing Properties.)
+4. The first time it is run, you will be required to enter a valid OPENAI API KEY.
+5. While using PaullyGPT, it will create a subfolder to contain transcript logs of the session as well as a config file containing the APIKEY to access OPENAI for future user.
+
+## Easy to Configure and Customize Behavior
 ```powershell
 Import-Module .\ConfigurationModule.psm1
 Import-Module .\OpenAIModule.psm1
@@ -95,14 +105,6 @@ Exit 1
    
 ! Note:
 Requires an openAi API subscription key, that will be saved when first loaded into a PaullyGPT.config.json file.
-
-## Instructions
-
-1. Unpack Zip file into a writable folder on a Windows compatible machine
-2. Launch the Run PaullyGPT.lnk shortcut link to launch Powershell with -ExecutionPolicy Bypass to get running.
-   (Note: If the shortcut fails to run the script, try to adjust the shortcut's START directory path to point to the PaullyGPT folder as needed, it might be stuck on a default value I had locally. You can modify the Start Path of the shortcut by right-clicking on and choosing Properties.)
-3. The first time it is run, you will be required to enter a valid OPENAI API KEY.
-4. While using PaullyGPT, it will create a subfolder to contain transcript logs of the session as well as a config file containing the APIKEY to access OPENAI for future user.
 
 ## More Information
 https://github.com/paullyvenne/paullygpt
