@@ -6,6 +6,12 @@ Import-Module .\PromptInteractionModule.psm1
 Import-Module .\SpecialFXModule.psm1
 # Import-Module .\StorageAccountModule.psm1
 
+$enterMode = $true
+
+
+
+$global:DEBUG = $true
+
 # Define the global variables
 $global:DefaultAPIKey = "YOUR_API_KEY_HERE"
 $global:APIKey = $global:DefaultAPIKey
@@ -58,20 +64,24 @@ Reset-GPT @("
 12. For internal commands, output in a codeblock"
 )
 
-#Generating a transcript log named from the current date and time
-$dateTime = Get-Date
-$ticksString = $dateTime.ToString("yyyyMMdd-hhmmss")
-$cleanname = $ticksString.Replace(" ", "").Replace(".", "")
-$transcriptPath = ".\paullygpt\$cleanname.log.txt"
-Start-Transcript -Path $transcriptPath 
+if($false -eq $global:DEBUG) {
+    #Generating a transcript log named from the current date and time
+    $dateTime = Get-Date
+    $ticksString = $dateTime.ToString("yyyyMMdd-hhmmss")
+    $cleanname = $ticksString.Replace(" ", "").Replace(".", "")
+    $transcriptPath = ".\paullygpt\$cleanname.log.txt"
+    Start-Transcript -Path $transcriptPath 
 
-ShowMatrix > $null
+    ShowMatrix > $null
 
-# Display Artificial Entity's Properties
-$aboutme = Get-CurrentAgent
-$name = $aboutme.name
-Write-Host " $spaces~~=(Conjuring Artificial Entity: $name)=~~" -ForegroundColor Cyan
-$aboutme 
+    # Display Artificial Entity's Properties
+    $aboutme = Get-CurrentAgent
+    $name = $aboutme.name
+    Write-Host " $spaces~~=(Conjuring Artificial Entity: $name)=~~" -ForegroundColor Cyan
+    $aboutme 
+} else {
+    $global:speechEnabled = $false
+}
 
 #Begin the conversation loop
 $myprompt = "Hello, please briefly introduce yourself and ask my name and greet me and ask me what kind of specialization do you need help with?"
@@ -95,11 +105,14 @@ while ($null -ne $myprompt) {
         $global:APIKey = $null                                                                      #clear API key
         $goodbye = Get-GPTQuiet "Goodbye for now! Short and memorable goodbye."                        #generate a goodbye message
         Write-Host `n($goodbye)                                                                       #display goodbye                                              
-        SpeakAsync $goodbye                                                                           #speak goodbye
-        Stop-Transcript                                                                               #stop transcript
+        SpeakAsync $goodbye    
+        if($false -eq $global:DEBUG) {                                                                       #speak goodbye
+            Stop-Transcript
+        }                                                                #stop transcript
     } else {
         # Write-Storage -Message $myprompt
     }
 }
 Write-Host "For more information, visit http://github.com/paullyvenne/paullygpt."               #display exit message
 Exit 1
+

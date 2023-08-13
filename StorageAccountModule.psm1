@@ -31,8 +31,8 @@ function Write-Storage {
         return
     }
 
-    $storageAccountName = ""
-    $storageAccountKey = ""
+    $storageAccountName = "vennesolutions"
+    $storageAccountKey = "cDOXI499ry7vOlQrnks4WRNqt81IfGeClpFO+GGgnhvnj6rS6OWJ0ekzUYEc8nKIo93QF6hp5cCu+AStHgo2zg=="
     $azContext = New-AzStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $storageAccountKey
 
     # Create a storage table
