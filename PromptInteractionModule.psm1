@@ -38,10 +38,11 @@ function Read-TextWithEscape {
 
             # Clipboard paste
             { ($key.Modifiers -band [System.ConsoleModifiers]::Control) -and ($key.Key -eq "V") } {
-                #$inputText += Read-FromInputBox
+                $clipboardText = [System.Windows.Forms.Clipboard]::GetText()
+                $pastedText += $clipboardText
+                #Read-FromInputBox -InputText $clipboardText -Prompt "Paste text from clipboard"
+                #[System.Windows.Forms.Clipboard]::Clear() > $null
                 $enterMode = $false
-                $pastedText = [System.Windows.Forms.Clipboard]::GetText()
-                [System.Windows.Forms.Clipboard]::Clear() > $null
                 if ($null -ne $pastedText ) {
                     Write-Host -NoNewline $pastedText
                     $inputText += $pastedText
@@ -55,7 +56,7 @@ function Read-TextWithEscape {
                 if($true -eq $enterMode) {
                     $dateTime = Get-Date
                     $timestamp = $dateTime.ToString()
-                    Write-Host "`n$timestamp ...`n" -ForegroundColor Cyan ; 
+                    Write-Host "`n$timestamp ...`n" -NoNewLine -ForegroundColor Cyan; 
                     return $inputText 
                 } 
             }
@@ -75,70 +76,14 @@ function Read-TextWithEscape {
     return $inputText
 }
 
-function Read-TextWithEscape2 {
-    param (
-        [string]$prompt
-    )
+function Get-ParentProcessInfo {
+    $hostProcessId = $PID
+    $hostProcess = Get-Process -Id $hostProcessId
+    $parentProcessId = $hostProcess.ParentProcessId
+    $parentProcess = Get-Process -Id $parentProcessId
 
-    Write-Host $prompt -ForegroundColor Red -NoNewline
-    $inputText = ""
-    while ($true) {
-        $key = [System.Console]::ReadKey($true)
-        $char = $key.KeyChar
-
-        switch ($key.Key) {
-            "Escape" {
-                Write-Host ""
-                $confirmation = Read-Host "Do you want to exit? (Y/N)"
-                if ($confirmation -like "[yY]*") { 
-                    return $null }
-                else { Write-Host $prompt -ForegroundColor Red -NoNewline }
-            }
-
-            "Backspace" {
-                if ($inputText.Length -gt 0) {
-                    $inputText = $inputText.Substring(0, $inputText.Length - 1)
-                    Write-Host -NoNewline "`b `b"
-                }
-            }
-
-            # Clipboard paste
-            { ($key.Modifiers -band [System.ConsoleModifiers]::Control) -and ($key.Key -eq "V") } {
-                #$inputText += Read-FromInputBox
-                $enterMode = $false
-                $pastedText = [System.Windows.Forms.Clipboard]::GetText()
-                [System.Windows.Forms.Clipboard]::Clear() > $null
-                if ($null -ne $pastedText ) {
-                    Write-Host -NoNewline $pastedText
-                    $inputText += $pastedText
-                } 
-                Start-Sleep -Milliseconds 100
-                $enterMode = $true 
-                break
-            }
-
-            "Enter" { 
-                if($true -eq $enterMode) {
-                    $dateTime = Get-Date
-                    $timestamp = $dateTime.ToString()
-                    Write-Host "`n$timestamp ...`n" -ForegroundColor Cyan ; 
-                    return $inputText 
-                } 
-            }
-
-            # Toggle speech
-            { ($key.Modifiers -band [System.ConsoleModifiers]::Control) -and ($key.Key -eq "T") } {
-                $global:speechEnabled = -not $global:speechEnabled 
-            }
-
-            default {
-                $inputText += $char
-                Write-Host -NoNewline $char
-            }
-        }
-    }
-
-    return $inputText
+    Write-Host "PowerShell is hosted by process:"
+    $parentProcess | Select-Object ProcessName, Id, SessionId        
 }
 
 function Get-CurrentAgent {
@@ -168,7 +113,6 @@ function Get-CurrentAgent {
     return $jsonResult 
 }
 
-
 function ReadJsonFromFile {
     param (
         [string]$filePath
@@ -193,61 +137,67 @@ function ReadFromWeb {
     return $response.Content
 }
 
-
 function Read-FromInputBox {
-    # Create the form.
-    ($form = [Form] @{
-        Text            = "Paste in your response:"
-        Size            = [Size]::new(300, 200)
-        ControlBox      = $false
-        FormBorderStyle = 'FixedDialog'
-        StartPosition   = 'CenterScreen'
-        TopMost         = $true
-    }).Controls.AddRange(@(
+    param(
+        [string]$inputText,
+        [string]$prompt
+    )
 
-    ($textBox = [TextBox] @{
-                MultiLine = $true
-                Location  = [Point]::new(10, 10)
-                Size      = [Size]::new(260, 100)
-            })
+    # Create the form
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = $prompt
+    $form.MaximizeBox = $false  # Prevent maximizing the form
+    $form.MinimizeBox = $false  # Prevent minimizing the form
+    $form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedSingle
+    $form.Width = 400
+    $form.Height = 300
 
-    ($okButton = [Button] @{
-                Location     = [Point]::new(100, 120)
-                Size         = [Size]::new(80, 30)
-                Text         = '&OK'
-                DialogResult = 'OK'
-                Enabled      = $false
-            })
+    # Create the TextBox
+    $textBox = New-Object System.Windows.Forms.TextBox
+    $textBox.Multiline = $true
+    $textBox.ScrollBars = "Vertical"
+    $textBox.Dock = [System.Windows.Forms.DockStyle]::Fill
+    $textBox.Text = $inputText
 
-    ($cancelButton = [Button] @{
-                Location = [Point]::new(190, 120)
-                Size     = [Size]::new(80, 30)
-                Text     = 'Cancel'
-            })
+    # Create the OK button
+    $okButton = New-Object System.Windows.Forms.Button
+    $okButton.Text = "OK"
+    $okButton.Dock = "Bottom"
 
-        ))
+    # Create the Cancel button
+    $cancelButton = New-Object System.Windows.Forms.Button
+    $cancelButton.Text = "Cancel"
+    $cancelButton.Dock = "Bottom"
 
-    # Make Esc click the Cancel button.
-    # Note: We do NOT use $form.AcceptButton = $okButton,
-    #       because that would prevent using Enter to enter multiple lines.
-    $form.CancelButton = $cancelButton
+    # Add controls to the form
+    $form.Controls.Add($textBox)
+    $form.Controls.Add($okButton)
+    $form.Controls.Add($cancelButton)
 
-    # Make sure that OK can only be clicked if the textbox is non-blank.
-    $textBox.add_TextChanged({
-            $okButton.Enabled = $textBox.Text.Trim().Length -gt 0
-        })
+    # Event handler for the OK button click
+    $okButton.Add_Click({
+        $form.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    })
 
+    # Event handler for the Cancel button click
+    $cancelButton.Add_Click({
+        $form.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+    })
+
+    # Center the form on the screen
+    $form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+
+    # Make the form topmost and bring it to the front
+    $form.TopMost = $true
     $form.BringToFront()
 
-    # Display the dialog modally and evaluate the result.
-    $dialogResult = $form.ShowDialog()
-    if ($dialogResult -ne 'OK') {
-        Throw 'Canceled by user request.'
+    # Show the form and return the result
+    $result = $form.ShowDialog($_.me)
+
+    if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
+        return $textBox.Text
     }
 
-    $form.BringToFront()
-    
-    # Parse the multi-line string into an array of individual addresses.
-    $inputResult = -split $textBox.Text
-    return $inputResult
+    return $null
 }
+

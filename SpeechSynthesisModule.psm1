@@ -16,13 +16,26 @@ function CancelSpeechSynthesis() {
     }
 }
 function GetVoiceList {
+    $synthesizer = New-Object -TypeName System.Speech.Synthesis.SpeechSynthesizer
     $voices = $synthesizer.GetInstalledVoices().VoiceInfo
 
-    Write-Host "Available voices:"
+    "Available voices:"
     $voices | ForEach-Object { "{0}. {1}" -f $_.VoiceIndex, $_.Name }
 
     return $voices
 }
+function SetDefaultVoice {
+    Param(
+        [Parameter(Mandatory=$true)]
+        [String] $voiceName
+    )
+
+    $synthesizer = New-Object -TypeName System.Speech.Synthesis.SpeechSynthesizer
+    $synthesizer.SelectVoice($voiceName)
+
+    Write-Host "Voice set to: $voiceName."
+}
+
 function SpeakAsync {
     param([string]$text)
 
@@ -49,4 +62,13 @@ function SpeakAsync {
         }
         Start-Sleep -Milliseconds 50
     }
+}
+
+function PromptVoice {
+    $voices = GetVoiceList
+    Write-Host "Choose a voice:"
+    $voices | ForEach-Object { "{0}. {1}" -f $_.VoiceIndex, $_.Name }
+    $voiceIndex = Read-Host "Enter voice index: "
+    $voiceName = $voices[$voiceIndex].Name
+    SetDefaultVoice -voiceName $voiceName
 }
