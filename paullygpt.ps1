@@ -7,7 +7,7 @@ Import-Module .\SpecialFXModule.psm1
 # Import-Module .\StorageAccountModule.psm1
 
 $global:version = "1.0.8"
-$global:DEBUG = $true
+$global:DEBUG = $false
 
 
 # Define the global variables
