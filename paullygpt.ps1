@@ -81,6 +81,7 @@ Reset-GPT @("
 
 if ($false -eq $global:DEBUG) {
     #Generating a transcript log named from the current date and time
+    $dateTime = Get-Date
     $ticksString = $dateTime.ToString("yyyyMMdd-hhmmss")
     $cleanname = $ticksString.Replace(" ", "").Replace(".", "")
     $transcriptPath = ".\paullygpt\$cleanname.log.txt"
