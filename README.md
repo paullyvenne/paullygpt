@@ -6,15 +6,15 @@ A flavor of ChatGPT powered by PowerShell.
 Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to enhance your research and interactive experiences. Powered by PowerShell, PaullyGPT seamlessly integrates with ChatGPT to provide you with a captivating conversational interface. Engage in insightful discussions, explore diverse perspectives, and unlock the vast depths of knowledge effortlessly. With PaullyGPT, you not only have access to text-based interactions but also the remarkable feature of text-to-speech functionality. Let PaullyGPT be your trusted companion on your journey of discovery, guiding you towards new horizons of knowledge and understanding. Elevate your research and interactive endeavors with the harmonious synergy of PaullyGPT and ChatGPT.
 
 ## Features
-* Experience the lightning-fast and user-friendly ChatGPT in the convenience of a PowerShell console or VSCODE with PS extensions.
-* Automatically save valuable conversation transcripts to a local folder for easy reference.
+* A lightning-fast and user-friendly ChatGPT experience in the convenience of a PowerShell or VSCODE Terminal with PS extensions.
+* Valuable conversation transcripts are automatically saved to a local folder for reference.
 * Seamlessly resume conversations with a handy summary of previous sessions, ensuring continuity and context.
-* Get started right away by simply entering your OpenAI API Key - no delays or complications.
 * Enhance your experience with useful Text-To-Speech Audio, bringing your conversations to life.
-* Explore the fully available source code to view or customize to suit your needs.
-* Personalize your interactions with configurable personalities, making every conversation unique.
 * Analyze and gain insights from small local text files right within the chat interface.
+* Explore the fully available source code to view or customize to suit your needs. No hidden logic.
+* Personalize your interactions with configurable personalities, making every conversation unique.
 * Effortlessly paste multiline text into Windows Terminal, streamlining your workflow.
+* Get started right away by simply entering your OpenAI API Key - no delays or complications.
 * Access an example Windows shortcut Link to launch the application with ease.
 
 ## BONUS - INDYGPT - A choose your own procedurally generated text based adventures game - Unlimited Adventure and Customizable
