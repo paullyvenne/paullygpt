@@ -211,17 +211,20 @@ function Recall_Last_Prompt {
         $lastWriteTime = $file.LastWriteTime
         $fileContents = Get-Content -Path $lastPath
         #resume last
-        $global:ChatHistory += @(@{ role = "user"; content = "today is $dateTime and previously on $lastWriteTime the following was discussed: ``````$fileContents``````" })
-        $prompt = "Welcome the user and if there was a previous session, resume our last conversation from $lastWriteTime by summarizing the notes but not after."
+        $global:ChatHistory += @(@{ role = "assistant"; content = "today is $dateTime and previously on $lastWriteTime the following was discussed: ``````$fileContents``````" })
+        $prompt = "Welcome the user and introduce yourself, based on the memory, show a summary of discussed topics and ask the user to begin a question. Keep adding to the list of discussed topics"
         return $prompt
     }
     $firstPrompt = "Welcome yourself and ask the user to begin a question."
     return $firstPrompt
 }
+
+
 function Summarize_Conversation {
-    $prompt = "Summarize our previous and latest conversation topics into bullet points that would be useful to resume our discussion for next time"
-    $global:ChatHistory += @(@{ role = "user"; content = $prompt }) #filler?
-    $summary = Get-GPTandForget ""
+    $prompt = "Summarize all topics discussed into bullet points which will be reviewed next time."
+    #{"role": "user", "content": "Thank you for the information!"},
+    $global:ChatHistory += @{ role = "user"; content = "Thank you."} #filler?
+    $summary = Get-GPTandForget $prompt
     return $summary
 }
 

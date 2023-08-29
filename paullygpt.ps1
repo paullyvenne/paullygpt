@@ -19,7 +19,7 @@ $dayOfWeek = $dateTime.DayOfWeek
 
 #MINIMALIST DIRECTIVE MODE
 $firstPrompt = "Say hello, mention it's $timestamp, the day of the week is $dayOfWeek, please briefly introduce yourself, ask name, ask what areas 'do you need help with?', and follow with one empty lines and share an insightful quote based on your character."
-$directives = "Be a helpful assistant and advisor."
+$directives = "Be a helpful assistant and advisor who can resume conversations with notes from previous sessions."
 Invoke_PaullyGPT_V1 -Directives $directives -FirstPrompt $firstPrompt -ResumeLastSession $true
 
 #Runs best with Visual Studio Code with Run command and Powershell extensions installed.
