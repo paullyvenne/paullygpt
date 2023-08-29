@@ -6,8 +6,8 @@ A flavor of ChatGPT powered by PowerShell.
 Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to enhance your research and interactive experiences. Powered by PowerShell, PaullyGPT seamlessly integrates with ChatGPT to provide you with a captivating conversational interface. Engage in insightful discussions, explore diverse perspectives, and unlock the vast depths of knowledge effortlessly. With PaullyGPT, you not only have access to text-based interactions but also the remarkable feature of text-to-speech functionality. Let PaullyGPT be your trusted companion on your journey of discovery, guiding you towards new horizons of knowledge and understanding. Elevate your research and interactive endeavors with the harmonious synergy of PaullyGPT and ChatGPT.
 
 ## Features
-* Experience the lightning-fast and user-friendly ChatGPT in the convenience of a PowerShell console or VSCODE with PS extensions.
-* Automatically save valuable conversation transcripts to a local folder for easy reference.
+* A lightning-fast and user-friendly ChatGPT experience in the convenience of a PowerShell  or VSCODE Terminal with PS extensions.
+* Valuable conversation transcripts are automatically saved to a local folder for reference.
 * Seamlessly resume conversations with a handy summary of previous sessions, ensuring continuity and context.
 * Get started right away by simply entering your OpenAI API Key - no delays or complications.
 * Enhance your experience with useful Text-To-Speech Audio, bringing your conversations to life.
