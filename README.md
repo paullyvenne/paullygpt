@@ -6,11 +6,19 @@ A flavor of ChatGPT powered by PowerShell.
 Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to enhance your research and interactive experiences. Powered by PowerShell, PaullyGPT seamlessly integrates with ChatGPT to provide you with a captivating conversational interface. Engage in insightful discussions, explore diverse perspectives, and unlock the vast depths of knowledge effortlessly. With PaullyGPT, you not only have access to text-based interactions but also the remarkable feature of text-to-speech functionality. Let PaullyGPT be your trusted companion on your journey of discovery, guiding you towards new horizons of knowledge and understanding. Elevate your research and interactive endeavors with the harmonious synergy of PaullyGPT and ChatGPT.
 
 ## Features
-* Fast and Easy to Use ChatGPT in a Powershell console.
-* Autosaves Conversation Transscripts to local text logs
-* Enter your OpenAI API Key and begin right away
-* Useful Text-To-Speech Audio
-* example Windows shortcut Link to launch included
+* Experience the lightning-fast and user-friendly ChatGPT in the convenience of a PowerShell console or VSCODE with PS extensions.
+* Automatically save valuable conversation transcripts to a local folder for easy reference.
+* Seamlessly resume conversations with a handy summary of previous sessions, ensuring continuity and context.
+* Get started right away by simply entering your OpenAI API Key - no delays or complications.
+* Enhance your experience with useful Text-To-Speech Audio, bringing your conversations to life.
+* Explore the fully available source code to view or customize to suit your needs.
+* Personalize your interactions with configurable personalities, making every conversation unique.
+* Analyze and gain insights from small local text files right within the chat interface.
+* Effortlessly paste multiline text into Windows Terminal, streamlining your workflow.
+* Access an example Windows shortcut Link to launch the application with ease.
+
+## BONUS - INDYGPT - A choose your own procedurally generated text based adventures game - Unlimited Adventure and Customizable
+* INDYGPT.ps1 is an engaging text-adventure encounter based on Indiana Jones as example of the power for OpenAI GPT directives and PaullyGPT Powershell module. 
 
 ## Instructions
 1. From Github, click the green CODE button to download zip file into a writable folder on a Windows compatible machine
@@ -99,8 +107,12 @@ Exit 1
 
 * !history - show conversation history
 * !clear - clear history
-* !load: {filepath} - loads a textfile into memory, limited to 250k.
+* !clear %1 - reset directives and clear history
+* !load: {filepath} - loads a textfile into memory, limited to 100k.
 * !aboutme - display the aboutme object
+* !summary - show a summary of current session
+* !memorize - save summary to be recalled/rememebred next time
+* !recall or !remember - load .\paullygpt\last.summary.txt and resume 
 
 ## Coming Soon
 * Personality types
