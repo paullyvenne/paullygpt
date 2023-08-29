@@ -9,7 +9,7 @@ Import-Module .\SpecialFXModule.psm1
 # Import the HTML Agility Pack module
 # Import-Module -Name HtmlAgilityPack
 
-$global:version = "1.0.10"
+$global:version = "1.0.11"
 $global:DEBUG = $false
 
 # Define the global variables
@@ -151,7 +151,7 @@ function Invoke_PaullyGPT_V1 {
     while ($null -ne $myprompt) {
         #Any commands begin with "!"
 
-        if ($myprompt -like "exit") {
+        if ($myprompt -like "!exit" -or $myprompt -like "exit" -or $myprompt -like "quit" -or $myprompt -like "bye" -or $myprompt -like "goodbye") {
             $myprompt = $null
             shutDown
             break
@@ -219,8 +219,9 @@ function Recall_Last_Prompt {
     return $firstPrompt
 }
 function Summarize_Conversation {
-    # $global:ChatHistory += @(@{ role = "user"; content = "" }) #filler?
-    $summary = Get-GPT "Summarize our conversations into bullet points. Include any questions, notes, thoughts, banter, comments, or feedback that would be useful to resume our discussion for next time"
+    $prompt = "Summarize our previous and latest conversation topics into bullet points that would be useful to resume our discussion for next time"
+    $global:ChatHistory += @(@{ role = "user"; content = $prompt }) #filler?
+    $summary = Get-GPTandForget ""
     return $summary
 }
 
