@@ -20,6 +20,10 @@ Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to en
 ## BONUS - INDYGPT - A choose your own procedurally generated text based adventures game - Unlimited Adventure and Customizable
 * INDYGPT.ps1 is an engaging text-adventure encounter based on Indiana Jones as example of the power for OpenAI GPT directives and PaullyGPT Powershell module. 
 
+# Main Scripts
+* Paullygpt.ps1 - Primary script to run PaullyGPT in Minimalistic Mode
+* IndyGPT.ps1 - A example of PaullyGPT module with text-adventure directives.
+
 ## Instructions
 1. From Github, click the green CODE button to download zip file into a writable folder on a Windows compatible machine
 2. Once all files are unzipped, launch the Run PaullyGPT.lnk shortcut link to launch Powershell with -ExecutionPolicy Bypass to get running. (Note: If the shortcut fails to run the script, try to adjust the shortcut's START directory path to point to the PaullyGPT folder as needed, it might be stuck on a default value I had locally. You can modify the Start Path of the shortcut by right-clicking on and choosing Properties.)
