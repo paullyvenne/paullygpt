@@ -1,6 +1,26 @@
 $global:prevFore = $Host.UI.RawUI.ForegroundColor
 $global:prevBack = $Host.UI.RawUI.BackgroundColor
 
+#PROTOYPE
+
+function PlayNote {
+    Param(
+        [int]$Frequency,
+        [int]$Duration
+    )
+
+    [console]::Beep($Frequency, $Duration)
+    Start-Sleep -Milliseconds 20
+}
+function PlayIntroMusic {
+    if($false -eq $global:DEBUG) {
+        PlayNote -Frequency 440 -Duration 500
+        PlayNote -Frequency 587 -Duration 500
+        PlayNote -Frequency 659 -Duration 1000
+        PlayNote -Frequency 784 -Duration 500
+    }
+}
+
 function ShowMatrix {
     param()
 
@@ -60,4 +80,99 @@ function ShowMatrix2 {
         # Add a small delay for the animation effect
         Start-Sleep -Milliseconds 10
     }
+}
+
+
+function GetStarPatternProbabilities {
+    param (
+        [string]$starPattern
+    )
+
+    $probabilities = @{}
+
+    # Remove newlines from the star pattern
+    $starPattern = $starPattern -replace "`r`n", ""
+
+    # Calculate the total characters (excluding newlines)
+    $totalCharacters = $starPattern.Length
+
+    # Count the occurrences of each character in the star pattern
+    foreach ($character in $starPattern) {
+        if ($character -notin $probabilities.Keys) {
+            $probabilities[$character] = 0
+        }
+        $probabilities[$character]++
+    }
+
+    # Calculate the probabilities for each character
+    foreach ($key in $probabilities.Keys) {
+        $probabilities[$key] = [Math]::Round($probabilities[$key] / $totalCharacters, 2)
+    }
+
+    return $probabilities
+}
+
+function GenerateStarPattern {
+    param (
+        [int]$width,
+        [int]$height,
+        [hashtable]$probabilities,
+        [int]$randomSeed = (Get-Date).Millisecond
+    )
+
+    $random = New-Object System.Random($randomSeed)
+    $starPattern = ""
+
+    # Create the new star pattern
+    for ($y = 1; $y -le $height; $y++) {
+        for ($x = 1; $x -le $width; $x++) {
+            $randomValue = $random.NextDouble()
+            $selectedCharacter = $null
+
+            # Select the character based on the probabilities
+            foreach ($key in $probabilities.Keys) {
+                if ($randomValue -lt $probabilities[$key]) {
+                    $selectedCharacter = $key
+                    break
+                }
+                $randomValue -= $probabilities[$key]
+            }
+
+            # If no character is selected, default to a whitespace
+            if (-not $selectedCharacter) {
+                $selectedCharacter = " "
+            }
+
+            $starPattern += $selectedCharacter
+        }
+
+        # Add a newline after each row
+        $starPattern += "`r`n"
+    }
+
+    return $starPattern
+}
+
+function starExample {
+    param()
+    
+    # Example usage
+    $starPattern = "
+        *  .  .       *
+        .       .   *
+    *   .    .       .
+        .    *
+    *    .   *    +
+        *    .  .       *
+        .       .   *
+    *   .    .       .
+        .    *
+    *    .   *    +"
+
+    $probabilities = GetStarPatternProbabilities -starPattern $starPattern
+
+    $width = 20
+    $height = 10
+
+    GenerateStarPattern -width $width -height $height -probabilities $probabilities
 }

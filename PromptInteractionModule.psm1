@@ -9,6 +9,7 @@ Import-Module .\OpenAIModule.psm1
 $global:speechEnabled = $true
 $enterMode = $true
 
+$lastKeyTime = Get-Date
 function Read-TextWithEscape {
     param (
         [string]$prompt
@@ -19,6 +20,12 @@ function Read-TextWithEscape {
     while ($true) {
         $key = [System.Console]::ReadKey($true)
         $char = $key.KeyChar
+
+        #Write-Host $key.Key -NoNewline -ForegroundColor Yellow
+
+        $lastDuration = (Get-Date) - $lastKeyTime
+        $enterMode = ($lastDuration.TotalMilliseconds -gt 100) # 100 MS since last keypress
+        $lastKeyTime = Get-Date
 
         switch ($key.Key) {
             "Escape" {
@@ -42,23 +49,22 @@ function Read-TextWithEscape {
                 $pastedText += $clipboardText
                 #Read-FromInputBox -InputText $clipboardText -Prompt "Paste text from clipboard"
                 #[System.Windows.Forms.Clipboard]::Clear() > $null
-                $enterMode = $false
+                # Write-Host "enterMode = $enterMode" -ForegroundColor Yellow
                 if ($null -ne $pastedText ) {
                     Write-Host -NoNewline $pastedText
                     $inputText += $pastedText
                 } 
                 Start-Sleep -Milliseconds 100
-                $enterMode = $true 
                 break
             }
 
             "Enter" { 
-                if($true -eq $enterMode) {
-                    $dateTime = Get-Date
-                    $timestamp = $dateTime.ToString()
-                    Write-Host "`n$timestamp ...`n" -NoNewLine -ForegroundColor Cyan; 
-                    return $inputText 
-                } 
+            if($true -eq $enterMode) {
+                $dateTime = Get-Date
+                $timestamp = $dateTime.ToString()
+                Write-Host "`n$timestamp ...`n" -NoNewLine -ForegroundColor Cyan; 
+                return $inputText 
+            }
             }
 
             # Toggle speech
@@ -92,23 +98,26 @@ function Get-CurrentAgent {
     $jsonResult = $null
 
     do {
-        $gptResponse = Get-GPT "a json with properties about yourself"
-
-        if ($gptResponse -ne $null) {
+        $gptResponse = Get-GPTQuiet "a json with properties about yourself"
+        if ($null -ne $gptResponse) {
             try {
-                $jsonResult = $gptResponse | ConvertFrom-Json
+                $jsonResult = $gptResponse 
+                #| ConvertFrom-Json
             }
             catch {
-                Write-Host "Error: Unable to convert GPT response to JSON format."
+                Write-Host $gptResponse
             }
         }
         else {
             $jsonResult = $gptResponse | Select-String -Pattern $jsonRegex | ForEach-Object { $_.Matches.Groups[1].Value }
         }
-
         $retries += 1
     }
-    until (($retries -gt 5) -or ($jsonResult -ne $null -or $jsonResult.Trim().Length -gt 0))
+    until (($retries -gt 5) -or ($null -ne $jsonResult -or $jsonResult.Trim().Length -gt 0))
+
+    if($retries -gt 5) {
+        Write-Host "Error: Unable to convert GPT response to JSON format."
+    }
 
     return $jsonResult 
 }

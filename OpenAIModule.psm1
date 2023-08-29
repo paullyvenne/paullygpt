@@ -4,14 +4,14 @@ function Send-OpenAICompletion {
         [string]$Prompt,
         [int]$MaxTokens = 500,
         [double]$Temperature = 0.8,
-        [string]$APIKey
+        [string]$APIKey,
+        [bool]$savePrompt = $true
     )
 
     $newMessage = @{
         role    = "user"
         content = $Prompt
     }
-
 
     $global:ChatHistory += $newMessage 
     $body = @{
@@ -50,8 +50,13 @@ function Send-OpenAICompletion {
         }
     }
     catch {
-        Write-Host "An error occurred: $($_.Exception.Message)" -ForegroundColor Red
-        Exit 1
+        if($true -eq $global:DEBUG) {
+            Write-Host "An error occurred: $_" -ForegroundColor Red
+            Write-Host ($param) -ForegroundColor Yellow
+        } else {
+            Write-Host "An error occurred: $($_.Exception.ToString())" -ForegroundColor Red
+        }
+        return $null
     }
 }
 function Send-OpenAICompletion2 {
@@ -127,7 +132,8 @@ function Get-OpenAICompletion {
     param (
         [string]$Prompt,
         [int]$MaxTokens = 500,
-        [double]$Temperature = 0.8
+        [double]$Temperature = 0.8,
+        [bool]$savePrompt = $true
     )
 
     $configFilePath = ".\paullygpt\paullygpt.config.json"
@@ -139,7 +145,7 @@ function Get-OpenAICompletion {
         Exit 1
     }
 
-    $result = Send-OpenAICompletion -Prompt $Prompt -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $apiKey
+    $result = Send-OpenAICompletion -Prompt $Prompt -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $apiKey -savePrompt $savePrompt 
     $isSVG = $result -match "(?s)<svg.*?</svg>"
     #i want to refactor the if below to properly check for null or empty svgmarkup
     if ($isSVG -eq $true) {
@@ -169,6 +175,14 @@ function Get-GPTQuiet {
         [string]$prompt
     )
     $completion = Get-OpenAICompletion -Prompt $prompt
+    return $completion
+}
+
+function Get-GPTandForget {
+    param(
+        [string]$prompt
+    )
+    $completion = Get-OpenAICompletion -Prompt $prompt -savePrompt $false
     return $completion
 }
 function Get-ValidAPIKey {

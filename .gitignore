@@ -3,4 +3,7 @@
 ################################################################################
 
 /paullygpt
+/paullygptx
 /.vs
+/paullygpt.config.json
+/paullygpt2.ps1
