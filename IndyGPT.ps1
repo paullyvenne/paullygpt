@@ -83,12 +83,16 @@ Expect encounters with local wildlife, criminals, authorities, or even internati
 The game should include a local guide or contact who will help Indy reach the artifact's location and provide necessary logistics. Along the way, Indy should acquire clues that bring him closer to the artifact, and perhaps even encounter a love interest who aids in the mission.
 Use stories based on the original Indiana Jones trilogy and other adventures from the Indiana Jones comic books as a basis but feel free to get creative with some twists occasionally.
 Introduce the game's rules, objective, and background story, including the year and exotic locale. Ensure the following features are incorporated:
-1) Always describe the current location and provide 4 options for the player to choose from, including an option to look for clues.
-1a) One option could set you back, while one or two others are dead ends, and the remaining are the different valid paths forward.
-2) Allow the player to move between exotic locations and keep track of time and location on a virtual ASCII map.
-3) Randomize dangerous NPC characters and obstacles based on the context of the location and overall story.
-4) Continuously track Indy's time, score, health, and objectives without resetting until the game starts over.
-5) Include RPG-like attributes such as intelligence, strength, knowledge, agility, speed, and Fortune or Glory quotient. Only indicate changed attributes during encounters."
+Indy also has luck points which he gains when he makes the right choices and loses when he makes the wrong choices. 
+1) Always describe the current location and provide 5 options of various risks for the player to choose from, including a fatal option or to look for clues. Depending on his cost of luck, Indy may be able to overcome the risks
+2) One option is could be fatal and comically dark or gruesome but PG-13, while one or two others are dead ends that take you back, and the remaining are the different valid paths forward.
+3) Allow the player to move between exotic locations and keep track of time and location on a virtual ASCII map.
+4) Continue to introduce dangerous NPC characters, assasins, and bandits and obstacles based on the context of the location and overall story that is influenced by Indy's luck.
+5) Continuously track Indy's time, score, health, and objectives without resetting until the game starts over.
+6) Include RPG-like attributes such as luck, intelligence, strength, knowledge, agility, speed, and Fortune or Glory quotient. Only indicate changed attributes during encounters.
+7) After each treasure, allow options that include selling out to the highest bidder, donating to a museum, or keeping it for yourself, or even destroying it.
+8) Finish the game with a win, lose, or quit screen, and ask if the player wants to play again. Describe conclusion the ending in a paragraph or two and ask the user if they want to try again. 
+9) If Indy dies, give the option to go back in time to the last save point if they have enough remaining luck points."
 
 PlayIndyMelody
 Invoke_PaullyGPT_V1 -Directives $directives -FirstPrompt $firstPrompt

@@ -10,7 +10,7 @@ function PlayNote {
     )
 
     [console]::Beep($Frequency, $Duration)
-    Start-Sleep -Milliseconds 20
+    # Start-Sleep -Milliseconds 20
 }
 function PlayIntroMusic {
     if($false -eq $global:DEBUG) {
