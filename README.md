@@ -24,7 +24,7 @@ Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to en
 ![PaullyGPT client in Powershell](images/paullygpt1.png)
 
 ## BONUS - INDYGPT - A choose your own procedurally generated text based adventures game - Unlimited Adventure and Customizable
-* INDYGPT.ps1 is an engaging text-adventure encounter based on Indiana Jones as example of the power of OpenAI GPT directives and PaullyGPT Powershell module.
+* INDYGPT.ps1 is an engaging text-adventure encounter based on Indiana Jones as example of the power of OpenAI GPT directives and PaullyGPT Powershell module. Every adventure is completely generated on the fly and sprinkled with exciting dialog and descriptive details.
 
 ![IndyGPT AI powered text-based adventure game](images/indygpt1.png)
 
