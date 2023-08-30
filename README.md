@@ -123,10 +123,11 @@ Exit 1
 * !recall or !remember - load .\paullygpt\last.summary.txt and resume 
 
 ## Coming Soon
-* Personality types
-* External Data Access
-* Short Term Memory Storage
-* Workflows/Processes
+* Proper Install/Deploy Package
+* Library of Personality types
+* External Large Data Access
+* Persistence Cloud Memory Storage
+* Multi-Agent Workflows/AI-Agent-As-A-Process
 * SVG graphical output
    
 ! Note:
