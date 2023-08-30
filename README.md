@@ -115,8 +115,8 @@ Exit 1
 
 * !history - show conversation history
 * !clear - clear history
-* !clear %1 - reset directives and clear history
-* !load: {filepath} - loads a textfile into memory, limited to 100k.
+* !clear {your directive} - reset directives and clear history (replaced param with your directive string)
+* !load: {load file path} - loads a textfile into memory, limited to 100k.
 * !aboutme - display the aboutme object
 * !summary - show a summary of current session
 * !memorize - save summary to be recalled/rememebred next time
