@@ -111,7 +111,7 @@ while ($null -ne $myprompt) {                                                   
 Write-Host "For more information, visit http://github.com/paullyvenne/paullygpt."               #display exit message
 Exit 1
 ```
-## Internal commands - type with !prefix in response prompt
+## Internal commands - type with !help to see commands
 
 * !history - show conversation history
 * !clear - clear history
