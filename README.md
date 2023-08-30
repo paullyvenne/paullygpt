@@ -7,7 +7,7 @@ Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to en
 
 # Main Scripts
 * Paullygpt.ps1 - Primary script to run PaullyGPT in Minimalistic Mode
-* IndyGPT.ps1 - A example of PaullyGPT module with text-adventure directives.
+* IndyGPT.ps1 - An example of PaullyGPT module with text-adventure directives.
 
 ## PaullyGPT Features
 * A lightning-fast and user-friendly ChatGPT experience in the convenience of a PowerShell or VSCODE Terminal with PS extensions.
