@@ -114,7 +114,7 @@ Exit 1
 ## Internal commands - type with !help to see commands
 
 * !history - show conversation history
-* !pop - remove last message from history.
+* !pop - remove last message from history
 * !clear - clear history
 * !clear {your directive} - reset directives and clear history (replaced param with your directive string)
 * !load: {load file path} - loads a textfile into memory, limited to 100k.
