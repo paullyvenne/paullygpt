@@ -305,7 +305,7 @@ function Invoke-PaullyGPTCommand {
     switch ($mycommand) {
 
         { $mycommand -like "help*" } { 
-            Write-Host "Commands: !help, !aboutme, !history, !memorize, !recall, !clear, !exit" -ForegroundColor Green
+            Write-Host "Commands: !help, !aboutme, !history, !memorize, !recall, !pop, !clear, !exit" -ForegroundColor Green
             Write-Host "Coming Soon: !savecode, !ls" -ForegroundColor Green
             break 
         }
@@ -342,6 +342,20 @@ function Invoke-PaullyGPTCommand {
                 Write-Host $summary -ForegroundColor Green
             }
             break }
+
+        { $mycommand -like "pop*" -or $mycommand -like "removelast*" } {
+            if ($global:ChatHistory.Length -gt 1) {
+                $global:ChatHistory = @($global:ChatHistory | Select-Object -SkipLast 1)
+                $directory = ".\paullygpt\"
+                $lastPathJson = $directory + "last.json"
+                $global:ChatHistory | ConvertTo-Json | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
+                $global:ChatHistory | ConvertTo-Json | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
+                Write-Host "-1 Pop goes the weasel!" -ForegroundColor Green
+                $summary = Summarize_Conversation
+                Write-Host $summary -ForegroundColor Green
+            }
+            break
+        }
 
         { $mycommand -like "memorize*" } { 
             #Save memory
