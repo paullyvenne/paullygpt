@@ -120,8 +120,8 @@ Exit 1
 * !load: {load file path} - loads a textfile into memory, limited to 100k.
 * !aboutme - display the aboutme object
 * !summary - show a summary of current session
-* !memorize - save summary to be recalled/rememebred next time
-* !recall or !remember - load .\paullygpt\last.summary.txt and resume
+* !memorize - save summary to be recalled on next load or on demand.
+* !recall or !remember - load .\paullygpt\last.json
 
 ## Coming Soon
 * Proper Install/Deploy Package
