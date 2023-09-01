@@ -114,13 +114,14 @@ Exit 1
 ## Internal commands - type with !help to see commands
 
 * !history - show conversation history
+* !pop - remove last message from history.
 * !clear - clear history
 * !clear {your directive} - reset directives and clear history (replaced param with your directive string)
 * !load: {load file path} - loads a textfile into memory, limited to 100k.
 * !aboutme - display the aboutme object
 * !summary - show a summary of current session
 * !memorize - save summary to be recalled/rememebred next time
-* !recall or !remember - load .\paullygpt\last.summary.txt and resume 
+* !recall or !remember - load .\paullygpt\last.summary.txt and resume
 
 ## Coming Soon
 * Proper Install/Deploy Package
