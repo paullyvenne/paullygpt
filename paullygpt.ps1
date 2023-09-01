@@ -8,7 +8,7 @@ Import-Module .\PaullyGPT.psm1
 
 $global:DEBUG = $false
 
-$global:YOUDONTMIND_SOUND = $true
+$global:YOUDONTMIND_SOUND = $false
 if($global:YOUDONTMIND_SOUND){ 
     PlayIntroMusic
 }
