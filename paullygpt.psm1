@@ -171,7 +171,9 @@ function Invoke_PaullyGPT_V1 {
             $myprompt = Invoke-PaullyGPTCommand -Command $mycommand -Directives $directives
         }
 
-        if ($null -ne $myprompt -and  (!$myprompt.StartsWith("!")) -and -not ($myprompt -like "`n*")) {
+#(!$myprompt.StartsWith("!")) -and 
+        
+        if ($null -ne $myprompt -and -not ($myprompt -like "`n*")) {
             $startTime = Get-Date
             $answer = Get-GPT $myprompt  
 
