@@ -1,12 +1,17 @@
+$global:MaxTokens = 500
+$global:Temperature = 0.8
+$global:MaxCompletionLoop = 5
+$global:MaxExceptionLoop = 5
+
 $lastContent = ""
 function Send-OpenAICompletion {
     param (
         [string]$Prompt,
-        [int]$MaxTokens = 500,
-        [double]$Temperature = 0.8,
+        [int]$MaxTokens = $global:MaxTokens,
+        [double]$Temperature = $global:Temperature,
         [string]$APIKey,
-        [int]$MaxCompletionLoop = 5,
-        [int]$MaxExceptionLoop = 5,
+        [int]$MaxCompletionLoop = $global:MaxCompletionLoop,
+        [int]$MaxExceptionLoop = $global:MaxExceptionLoop,
         [bool]$SavePrompt = $true,
         [bool]$SaveResponse = $true
     )

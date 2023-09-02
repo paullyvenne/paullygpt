@@ -7,6 +7,11 @@ Import-Module .\SpecialFXModule.psm1
 Import-Module .\PaullyGPT.psm1
 
 $global:DEBUG = $false
+$global:MaxTokens = 800    #conversation size limit
+$global:Temperature = 0.4  #randomness
+#q: what happens the higher the temperature?
+$global:MaxCompletionLoop = 5
+$global:MaxExceptionLoop = 5
 
 $global:YOUDONTMIND_SOUND = $false
 if($global:YOUDONTMIND_SOUND){ 

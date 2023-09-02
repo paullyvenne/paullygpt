@@ -17,6 +17,10 @@ function Read-Config {
 function Get-PaullyGPTConfig {
     $configPath = ".\paullygpt\paullygpt.config.json"
 
+    # $readme = ".\readme.md"
+    # $fileContents = (Get-Content $readme) | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
+    # LearnFromSourceGPT -Source $readme -Contents $fileContents -analyzeContents $true
+
     # Create the "paullygpt" folder if it doesn't exist
     $paullyGptFolderPath = Join-Path $PSScriptRoot "paullygpt"
     if (-not (Test-Path -Path $paullyGptFolderPath -PathType Container)) {

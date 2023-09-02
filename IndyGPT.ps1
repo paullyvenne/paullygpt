@@ -11,6 +11,10 @@ Import-Module .\PaullyGPT.psm1
 #of the Indiana Jones owners of or intended to be used for any commercial purposes but merely educational and learning purposes.
 
 $global:DEBUG = $false
+$global:MaxTokens = 500
+$global:Temperature = 0.9
+$global:MaxCompletionLoop = 5
+$global:MaxExceptionLoop = 5
 
 function PlayIndyMelody {
     $ebFrequency = 311.13  # E-flat
@@ -66,6 +70,8 @@ function PlayIndyMelody {
 # 17) Make it so each option is interesting and has some emotional outcome.
 # 18) Make each option have some kind of advantage and disadvantage and show it as a suffix on the choice. 
 # 19) The last option is the ability to ask questions to get descriptive information about the story and puzzle."
+
+
 
 $firstPrompt = "With flair start the introduction about Indiana Jones, then list a the adventures to choose from."
 #OPTIMIZED VERSION OF THE ABOVE - COMPACTED AND SUMMARIZED

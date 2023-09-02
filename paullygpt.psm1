@@ -168,14 +168,14 @@ function Invoke_PaullyGPT_V1 {
         if ($myprompt -like "!*" ) {
             $mycommand = [string]::new($myprompt).Substring(1, $myprompt.Length - 1).Trim()
             Write-Host "`n" -NoNewline
-            $myprompt = Invoke-PaullyGPTCommand -Command $mycommand
+            $myprompt = Invoke-PaullyGPTCommand -Command $mycommand -Directives $directives
         }
 
         if ($null -ne $myprompt -and  (!$myprompt.StartsWith("!")) -and -not ($myprompt -like "`n*")) {
             $startTime = Get-Date
             $answer = Get-GPT $myprompt  
 
-            if(if($true -eq $saveLastSession) -and ($myprompt -ne $firstPrompt)) {
+            if(($true -eq $saveLastSession) -and ($myprompt -ne $firstPrompt)) {
                 $directory = ".\paullygpt\"
                 $lastPathJson = $directory + "last.json"
                 $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
@@ -309,7 +309,8 @@ function Save_Summary {
 #-------------------------------------------------------
 function Invoke-PaullyGPTCommand {
     param(
-        [string]$Command   
+        [string]$Directives,
+        [string]$Command
     )
 
     $mycommand = $Command
@@ -459,7 +460,8 @@ function Invoke-PaullyGPTCommand {
                 $confirmation = Read-Host "Are you sure you want to clear history? (Y/N)"
                 if ($confirmation -eq "Y") {
                     if ($global:ChatHistory.Length -gt 0) {
-                        $global:ChatHistory = @($global:ChatHistory | Select-Object -First 1)
+                        #$global:ChatHistory = @($global:ChatHistory | Select-Object -First 1)
+                        $global:ChatHistory = @(@{ role = "system"; content = $directives;})
                         Write-Host "Cleared!" -ForegroundColor Green
                     }
                 }
