@@ -87,11 +87,11 @@ function Send-OpenAICompletion {
         Write-Host "An error occurred: $($_.Exception.ToString())" -ForegroundColor Red
         $httpResponse = $_.Exception.Response
         if ($httpResponse -and $httpResponse.StatusCode -eq "BadRequest") {
-            $largestMessageIndex = $global:ChatHistory | Sort-Object { $_.content.Length } -Descending | Select-Object -First 1        
+            $largestMessageIndex = $global:ChatHistory.Keys | Sort-Object { $global:ChatHistory[$_] } -Descending | Select-Object -First 1
             if (($MaxExceptionLoop -gt 0) -and ($null -ne $largestMessageIndex)) {
                 Write-Host "." -NoNewline -ForegroundColor Red
                 $clone = $global:ChatHistory.Clone()
-                $clone.RemoveAt($largestMessageIndex)
+                $clone.Remove($largestMessageIndex)
                 $global:ChatHistory = $clone
                 $output = Send-OpenAICompletion -Prompt "" -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $APIKey -SavePrompt $SavePrompt -SaveReponse $saveResponse -MaxCompletionLoop $MaxCompletionLoop -MaxExceptionLoop ($MaxExceptionLoop-1)                       
             }
@@ -263,6 +263,10 @@ function Get-OpenAICompletion {
         $result = $result.Replace($svgMarkup, "[See Visual Output]")
         Update-SVG -SVGMarkup $svgMarkup -Title "Paully GPT" 
     }
+
+    #Clean Up
+    $filteredArray = $global:ChatHistory | Where-Object { $_.role -ne "user" -or !$_.content.StartsWith($hash) }
+    $global:ChatHistory = $filteredArray
     return $result
 }
 function Reset-GPT {

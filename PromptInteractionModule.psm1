@@ -59,12 +59,15 @@ function Read-TextWithEscape {
             }
 
             "Enter" { 
-            if($true -eq $enterMode) {
-                $dateTime = Get-Date
-                $timestamp = $dateTime.ToString()
-                Write-Host "`n$timestamp ..." -NoNewLine -ForegroundColor Cyan; 
-                return $inputText 
-            }
+                if($true -eq $enterMode) {
+                    $dateTime = Get-Date
+                    $timestamp = $dateTime.ToString()
+                    Write-Host "`n$timestamp ..." -NoNewLine -ForegroundColor Cyan; 
+                    return $inputText 
+                } else {
+                    $inputText += "`n"
+                    #Write-Host "`n" -NoNewLine -ForegroundColor Cyan; 
+                }
             }
 
             # Toggle speech

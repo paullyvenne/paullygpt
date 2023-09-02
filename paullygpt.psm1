@@ -17,7 +17,7 @@ $global:DefaultAPIKey = "YOUR_API_KEY_HERE"
 $global:APIKey = $global:DefaultAPIKey
 $global:Model = "gpt-3.5-turbo-16k" #"gpt-4"
 $global:ChatHistory = @()
-$global:fileSizeLimit = 100 #kb
+$global:fileSizeLimit = 76 #kb
 
 $dateTime = Get-Date
 $timestamp = $dateTime.ToString()
@@ -140,7 +140,7 @@ function Invoke_PaullyGPT_V1 {
     }
 
     if($true -eq $resumeLastSession) {
-        $myprompt = Recall_Conversation_History 
+        $myprompt = Recall_Conversation_History -DefaultPrompt $firstPrompt
     } else {
         $myprompt = $firstPrompt
     }
@@ -166,10 +166,11 @@ function Invoke_PaullyGPT_V1 {
 
         if ($myprompt -like "!*" ) {
             $mycommand = [string]::new($myprompt).Substring(1, $myprompt.Length - 1).Trim()
+            Write-Host "`n" -NoNewline
             $myprompt = Invoke-PaullyGPTCommand -Command $mycommand
         }
 
-        if ($null -ne $myprompt -and -not ($myprompt -like "`n*")) {
+        if ($null -ne $myprompt -and  (!$myprompt.StartsWith("!")) -and -not ($myprompt -like "`n*")) {
             $startTime = Get-Date
             $answer = Get-GPT $myprompt  
 
@@ -182,7 +183,7 @@ function Invoke_PaullyGPT_V1 {
 
             $finishTime = Get-Date
             $totalSeconds = [Math]::Round(($finishTime).Subtract($startTime).TotalSeconds, 1)
-            Write-Host " $totalSeconds seconds." -ForegroundColor Cyan                                                               #OPENAI MAGIC returned into variable => $answer to reuse
+            Write-Host " $totalSeconds seconds." -ForegroundColor Cyan                                                  #OPENAI MAGIC returned into variable => $answer to reuse
             Write-Host "`n$answer`n" -ForegroundColor Blue
             # Write-Storage -Message $answer
             SpeakAsync $answer
@@ -226,13 +227,14 @@ function shutDown {
     # if($true -eq $global:DEBUG) {
     #     Write-Host $summary -ForegroundColor Green
     # }
-    $goodbye = Get-GPTandForget "Goodbye for now and stay curious!"
+    #Get-GPTandForget 
+    $goodbye = "Goodbye for now and stay curious!"
     Write-Host `n($goodbye)
     SpeakAsync $goodbye  
 }
 
 function Recall_Conversation_History {
-    Param()
+    Param([string]$DefaultPrompt)
     $lastPath = ".\paullygpt\last.json"
     if($true -eq (Test-Path $lastPath)) {
         $dateTime = Get-Date
@@ -253,7 +255,6 @@ function Recall_Conversation_History {
             }
         }
     }
-    $firstPrompt = "Welcome yourself and ask the user to begin a question."
     return $firstPrompt
 }
 
@@ -279,8 +280,7 @@ function Recall_Last_Prompt {
 function Summarize_Conversation {
     $prompt = "Summarize all topics discussed into bullet points which will be reviewed next time."
     #{"role": "user", "content": "Thank you for the information!"},
-    $global:ChatHistory += @{ role = "user"; content = "Thank you."} #filler?
-    $summary = Get-GPTandForget $prompt
+    $summary = Get-GPTQuiet $prompt
     return $summary
 }
 
@@ -358,7 +358,7 @@ function Invoke-PaullyGPTCommand {
 
         { $mycommand -like "pop*" -or $mycommand -like "removelast*" } {
             if ($global:ChatHistory.Length -gt 1) {
-                $global:ChatHistory = @($global:ChatHistory | Select-Object -SkipLast 1)
+                Pop_History
                 $directory = ".\paullygpt\"
                 $lastPathJson = $directory + "last.json"
                 $global:ChatHistory | ConvertTo-Json | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
@@ -404,7 +404,7 @@ function Invoke-PaullyGPTCommand {
             }
             catch {
                 Write-Host "Error: Failed to retrieve web page content for $url. $_" -ForegroundColor Red
-                $global:ChatHistory = @($global:ChatHistory | Select-Object -SkipLast 1)
+                Pop_History
             }
             break
         }
@@ -432,7 +432,7 @@ function Invoke-PaullyGPTCommand {
             }
             catch {
                 Write-Host "Error: Failed to retrieve file content for $param. $_" -ForegroundColor Red
-                $global:ChatHistory = @($global:ChatHistory | Select-Object -SkipLast 1)
+                Pop_History
             }
             break
         }
@@ -502,7 +502,13 @@ function LearnFromSourceGPT {
 
     $startTime = Get-Date
     Write-Host "Analyzing..." -ForegroundColor Green
-    $analysis = Get-GPT "Give me an analysis this text labeled $hash : ``````$encoded_contents``````"
+    $lastCount = $global:ChatHistory.Count
+    $analysis = Get-GPT "Give me a compact detailed analysis of snippet '$hash' from source '$source' which contains : ``````$encoded_contents``````"
+    if($global:ChatHistory.Count -gt 0) {
+        $filteredArray = $global:ChatHistory | Where-Object { $_.role -ne "user" -or !$_.content.StartsWith($hash) }
+        $global:ChatHistory = $filteredArray
+    }
+
     if($null -ne $analysis) {
         $finishTime = Get-Date
         $totalSeconds = [Math]::Round(($finishTime).Subtract($startTime).TotalSeconds, 1)
@@ -513,7 +519,6 @@ function LearnFromSourceGPT {
         #     content = $analysis
         # }
     }
-    # $global:ChatHistory = $backup
     return $analysis
 }
 
@@ -528,4 +533,10 @@ function ExtractHtmlInnerText {
     $filteredBytes = $bytes | Where-Object { $_ -lt 128 -or $_ -ge 192 }
     $utf8String = [System.Text.Encoding]::UTF8.GetString($filteredBytes)
     return $utf8String
+}
+
+function Pop_History {
+    $last = @($global:ChatHistory | Select-Object -Last 1)
+    $global:ChatHistory = @($global:ChatHistory | Select-Object -SkipLast 1)
+    return $last
 }
