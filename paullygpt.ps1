@@ -6,7 +6,7 @@ Import-Module .\PromptInteractionModule.psm1
 Import-Module .\SpecialFXModule.psm1
 Import-Module .\PaullyGPT.psm1
 
-$global:DEBUG = $true
+$global:DEBUG = $false
 
 $global:YOUDONTMIND_SOUND = $false
 if($global:YOUDONTMIND_SOUND){ 
