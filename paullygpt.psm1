@@ -36,6 +36,7 @@ $transcriptPath3 = ".\paullygpt\transcript.json"
 function Invoke_PaullyGPT_V1 {
     param(
         [bool] $resumeLastSession = $false,
+        [bool] $saveLastSession = $false,
         [string]$firstPrompt = "Say hello, mention it's $timestamp, the day of the week is $dayOfWeek, please briefly introduce yourself, ask name, ask what areas 'do you need help with?', and follow with one empty lines and share an insightful quote based on your character. ",
         [string]$directives = "
     Follow these directives:
@@ -174,7 +175,7 @@ function Invoke_PaullyGPT_V1 {
             $startTime = Get-Date
             $answer = Get-GPT $myprompt  
 
-            if($myprompt -ne $firstPrompt) {
+            if(if($true -eq $saveLastSession) -and ($myprompt -ne $firstPrompt)) {
                 $directory = ".\paullygpt\"
                 $lastPathJson = $directory + "last.json"
                 $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
@@ -220,7 +221,7 @@ function Invoke_PaullyGPT_V1 {
 function shutDown {
     $global:APIKey = $null                                                                      #clear API key
     #say goodbye
-    Write-Host "Saving memories and shutting down..."
+    #Write-Host "Saving memories and shutting down..."
     #1
     #stop transcript and summarize 
     # $summary = Save_Summary -Path $transcriptPath2
@@ -260,17 +261,19 @@ function Recall_Conversation_History {
 
 function Recall_Last_Prompt {
     Param()
-    $lastPath = ".\paullygpt\last.summary.txt"
-    if($true -eq (Test-Path $lastPath)) {
-        $dateTime = Get-Date
-        $file = Get-Item -Path $lastPath
-        $lastWriteTime = $file.LastWriteTime
-        $fileContents = Get-Content -Path $lastPath
-        #resume last
-        if($false -eq [string]::IsNullOrEmpty($fileContents)) {
-            $global:ChatHistory += @(@{ role = "assistant"; content = "today is $dateTime and previously on $lastWriteTime the following was discussed: ``````$fileContents``````" })
-            $prompt = "Welcome the user and introduce yourself, based on the memory, show a summary of discussed topics and ask the user to begin a question. Keep adding to the list of discussed topics"
-            return $prompt
+    if($true -eq $resumeLastSession) {
+        $lastPath = ".\paullygpt\last.summary.txt"
+        if($true -eq (Test-Path $lastPath)) {
+            $dateTime = Get-Date
+            $file = Get-Item -Path $lastPath
+            $lastWriteTime = $file.LastWriteTime
+            $fileContents = Get-Content -Path $lastPath
+            #resume last
+            if($false -eq [string]::IsNullOrEmpty($fileContents)) {
+                $global:ChatHistory += @(@{ role = "assistant"; content = "today is $dateTime and previously on $lastWriteTime the following was discussed: ``````$fileContents``````" })
+                $prompt = "Welcome the user and introduce yourself, based on the memory, show a summary of discussed topics and ask the user to begin a question. Keep adding to the list of discussed topics"
+                return $prompt
+            }
         }
     }
     $firstPrompt = "Welcome yourself and ask the user to begin a question."
@@ -286,16 +289,18 @@ function Summarize_Conversation {
 
 function Save_Summary {
     Param([string]$Path)
-    $directory = ".\paullygpt\"
-    $fileName = Split-Path -Path $Path -Leaf
-    # $fullPath = $directory + $fileName.Replace(".log.txt", ".summary.txt")
-    # $lastPath = $directory + "last.summary.txt"
-    $lastPathJson = $directory + "last.json"
-    # $summary = Summarize_Conversation
-    # $summary | Out-File -FilePath $fullPath -Encoding UTF8 -Force!me
-    # $summary | Out-File -FilePath $lastPath -Encoding UTF8 -Force
-    $global:ChatHistory | ConvertTo-Json | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
-    Write-Host "Saved memories to $lastPathJson." -ForegroundColor Green
+    if($true -eq $saveLastSession) {
+        $directory = ".\paullygpt\"
+        $fileName = Split-Path -Path $Path -Leaf
+        # $fullPath = $directory + $fileName.Replace(".log.txt", ".summary.txt")
+        # $lastPath = $directory + "last.summary.txt"
+        $lastPathJson = $directory + "last.json"
+        # $summary = Summarize_Conversation
+        # $summary | Out-File -FilePath $fullPath -Encoding UTF8 -Force!me
+        # $summary | Out-File -FilePath $lastPath -Encoding UTF8 -Force
+        $global:ChatHistory | ConvertTo-Json | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
+        Write-Host "Saved memories to $lastPathJson." -ForegroundColor Green
+    }
     return $summary
 }
 

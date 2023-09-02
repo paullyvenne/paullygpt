@@ -95,4 +95,4 @@ Indy also has luck points which he gains when he makes the right choices and los
 9) If Indy dies, give the option to go back in time to the last save point if they have enough remaining luck points."
 
 PlayIndyMelody
-Invoke_PaullyGPT_V1 -Directives $directives -FirstPrompt $firstPrompt
+Invoke_PaullyGPT_V1 -Directives $directives -FirstPrompt $firstPrompt -ResumeLastSession $false -SaveSession $false
