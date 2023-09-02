@@ -62,7 +62,7 @@ function Read-TextWithEscape {
             if($true -eq $enterMode) {
                 $dateTime = Get-Date
                 $timestamp = $dateTime.ToString()
-                Write-Host "`n$timestamp ...`n" -NoNewLine -ForegroundColor Cyan; 
+                Write-Host "`n$timestamp ..." -NoNewLine -ForegroundColor Cyan; 
                 return $inputText 
             }
             }

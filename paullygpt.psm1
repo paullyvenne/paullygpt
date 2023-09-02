@@ -9,7 +9,7 @@ Import-Module .\SpecialFXModule.psm1
 # Import the HTML Agility Pack module
 # Import-Module -Name HtmlAgilityPack
 
-$global:version = "1.0.11"
+$global:version = "1.0.12"
 $global:DEBUG = $false
 
 # Define the global variables
@@ -71,6 +71,7 @@ function Invoke_PaullyGPT_V1 {
     #Load the config file or initialize if needed
     Get-PaullyGPTConfig > $null
 
+    #Launch-HTTPListener -Port 8080 -Verbose:$false
     #PromptSettings
     #PromptVoice
     #PromptCharacter
@@ -175,13 +176,13 @@ function Invoke_PaullyGPT_V1 {
             if($myprompt -ne $firstPrompt) {
                 $directory = ".\paullygpt\"
                 $lastPathJson = $directory + "last.json"
-                $global:ChatHistory | ConvertTo-Json | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
-                $global:ChatHistory | ConvertTo-Json | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
+                $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
+                $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
             }
 
             $finishTime = Get-Date
             $totalSeconds = [Math]::Round(($finishTime).Subtract($startTime).TotalSeconds, 1)
-            Write-Host "$totalSeconds seconds." -ForegroundColor Cyan                                                               #OPENAI MAGIC returned into variable => $answer to reuse
+            Write-Host " $totalSeconds seconds." -ForegroundColor Cyan                                                               #OPENAI MAGIC returned into variable => $answer to reuse
             Write-Host "`n$answer`n" -ForegroundColor Blue
             # Write-Storage -Message $answer
             SpeakAsync $answer
@@ -240,9 +241,16 @@ function Recall_Conversation_History {
         $fileContents = Get-Content -Path $lastPath
         #resume last
         if($null -ne $fileContents) {
-            $global:ChatHistory = $fileContents | ConvertFrom-Json
-            $prompt = "Welcome the user and introduce yourself, based on the memory, show a summary of discussed topics and ask the user to begin a question. Keep adding to the list of discussed topics"
-            return $prompt
+            $newJson = $fileContents | ConvertFrom-Json 
+            if($newJson.Count -gt 0) {
+                if($newJson.Count -eq "1") {
+                    $global:ChatHistory = @($newJson)
+                } else {
+                    $global:ChatHistory = $newJson
+                    $prompt = "Welcome the user and introduce yourself, based on the memory, show a summary of discussed topics and ask the user to begin a question. Keep adding to the list of discussed topics"
+                    return $prompt
+                }
+            }
         }
     }
     $firstPrompt = "Welcome yourself and ask the user to begin a question."
@@ -305,7 +313,7 @@ function Invoke-PaullyGPTCommand {
     switch ($mycommand) {
 
         { $mycommand -like "help*" } { 
-            Write-Host "Commands: !help, !aboutme, !history, !memorize, !recall, !pop, !clear, !exit" -ForegroundColor Green
+            Write-Host "Commands: !help, !aboutme, !history, !memorize, !recall, !pop, !remove [index], !clear [newdirective], !load [filename], !exit" -ForegroundColor Green
             Write-Host "Coming Soon: !savecode, !ls" -ForegroundColor Green
             break 
         }
@@ -342,6 +350,11 @@ function Invoke-PaullyGPTCommand {
                 Write-Host $summary -ForegroundColor Green
             }
             break }
+
+        { $mycommand -like "remove*" } {
+            $indexToRemove = ($mycommand -replace "remove", "").Trim()
+            $global:ChatHistory = $global:ChatHistory | Where-Object { $global:ChatHistory.IndexOf($_) -ne $indexToRemove }
+        }
 
         { $mycommand -like "pop*" -or $mycommand -like "removelast*" } {
             if ($global:ChatHistory.Length -gt 1) {
@@ -493,7 +506,7 @@ function LearnFromSourceGPT {
     if($null -ne $analysis) {
         $finishTime = Get-Date
         $totalSeconds = [Math]::Round(($finishTime).Subtract($startTime).TotalSeconds, 1)
-        Write-Host "$totalSeconds seconds." -ForegroundColor Cyan                                                               #OPENAI MAGIC returned into variable => $answer to reuse
+        Write-Host " $totalSeconds seconds." -ForegroundColor Cyan                                                               #OPENAI MAGIC returned into variable => $answer to reuse
         Write-Host "`n$analysis`n" -ForegroundColor Blue
         # $backup += @{
         #     role    = "assistant"

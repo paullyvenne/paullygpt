@@ -1,19 +1,27 @@
-
+$lastContent = ""
 function Send-OpenAICompletion {
     param (
         [string]$Prompt,
         [int]$MaxTokens = 500,
         [double]$Temperature = 0.8,
         [string]$APIKey,
-        [bool]$savePrompt = $true
+        [int]$MaxCompletionLoop = 5,
+        [int]$MaxExceptionLoop = 5,
+        [bool]$SavePrompt = $true,
+        [bool]$SaveResponse = $true
     )
 
-    $newMessage = @{
-        role    = "user"
-        content = $Prompt
+    $output = ""
+
+    if($SavePrompt -eq $true) {
+        $Prompt = $Prompt.Trim()
+        $newMessage = @{
+            role    = "user"
+            content = [System.Text.Encoding]::UTF8.GetString([System.Text.Encoding]::UTF8.GetBytes($Prompt))
+        }
+        $global:ChatHistory += $newMessage 
     }
 
-    $global:ChatHistory += $newMessage 
     $body = @{
         model       = $global:Model
         messages    = $global:ChatHistory
@@ -42,12 +50,53 @@ function Send-OpenAICompletion {
                 throw [System.Exception]::new($response.error.message)
             }
             else {
-                return $response.choices[0].message.content
+                #content should alwasys be final message.
+                $content = [System.Text.Encoding]::UTF8.GetString([System.Text.Encoding]::UTF8.GetBytes($response.choices[0].message.content))
+                #encode $content to utf-8
+                
+                $reason = $response.choices[0].finish_reason
+
+                if($SaveResponse -eq $true) {
+                    $newResponse = @{
+                        role    = "assistant"
+                        content = $content
+                    }
+                    $global:ChatHistory += $newResponse 
+                }
+                
+                $output += $content
+                if(($MaxCompletionLoop -gt 0) -and ($reason -eq "length")) {
+                    $added = ""
+                    if($lastContent.length -gt 0) {
+                        $added = $content.Replace($lastContent, "")
+                    } else {
+                        $added = $content
+                    }
+                    Write-Host "." -ForegroundColor Yellow -NoNewline
+                    #Write-Host "$reason : $added`nStill thinking..." -ForegroundColor Yellow
+                    $output += Send-OpenAICompletion -Prompt "continue" -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $APIKey -SavePrompt $false -SaveReponse $true -MaxCompletionLoop ($MaxCompletionLoop-1) -MaxExceptionLoop $MaxExceptionLoop                   
+                }
+                return $output
             }
         }
         else {
             throw [System.Exception]::new("An unexpected error occurred. The response was null.")
         }
+    }
+    catch [System.Net.WebException] {
+        Write-Host "An error occurred: $($_.Exception.ToString())" -ForegroundColor Red
+        $httpResponse = $_.Exception.Response
+        if ($httpResponse -and $httpResponse.StatusCode -eq "BadRequest") {
+            $largestMessageIndex = $global:ChatHistory | Sort-Object { $_.content.Length } -Descending | Select-Object -First 1        
+            if (($MaxExceptionLoop -gt 0) -and ($null -ne $largestMessageIndex)) {
+                Write-Host "." -NoNewline -ForegroundColor Red
+                $clone = $global:ChatHistory.Clone()
+                $clone.RemoveAt($largestMessageIndex)
+                $global:ChatHistory = $clone
+                $output = Send-OpenAICompletion -Prompt "" -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $APIKey -SavePrompt $SavePrompt -SaveReponse $saveResponse -MaxCompletionLoop $MaxCompletionLoop -MaxExceptionLoop ($MaxExceptionLoop-1)                       
+            }
+        }
+        throw [System.Exception]::new("An unexpected error occurred: $_")
     }
     catch {
         if($true -eq $global:DEBUG) {
@@ -56,84 +105,145 @@ function Send-OpenAICompletion {
         } else {
             Write-Host "An error occurred: $($_.Exception.ToString())" -ForegroundColor Red
         }
-        return $null
     }
+    return $null
 }
-function Send-OpenAICompletion2 {
-    param (
-        [string]$Prompt,
-        [int]$MaxTokens = 500,
-        [double]$Temperature = 0.8,
-        [string]$APIKey,
-        [switch]$Paginate
-    )
+# function Send-OpenAICompletion3 {
+#     param (
+#         [string]$Prompt,
+#         [int]$MaxTokens = 500,
+#         [double]$Temperature = 0.8,
+#         [string]$APIKey,
+#         [bool]$savePrompt = $true
+#     )
 
-    $global:ChatHistory += @{
-        role    = "user"
-        content = $Prompt
-    }
-    $body = @{
-        model       = $global:Model
-        messages    = $global:ChatHistory
-        temperature = $Temperature
-        max_tokens  = $MaxTokens
-        n           = 1
-        stop        = $null
-    } | ConvertTo-Json -Depth 5 -Compress
+#     $newMessage = @{
+#         role    = "user"
+#         content = $Prompt
+#     }
 
-    $headers = @{
-        "Content-Type"  = "application/json"
-        "Authorization" = "Bearer $APIKey"
-    }
+#     $global:ChatHistory += $newMessage 
+#     $body = @{
+#         model       = $global:Model
+#         messages    = $global:ChatHistory
+#         temperature = $Temperature
+#         max_tokens  = $MaxTokens
+#         n           = 1
+#         stop        = $null
+#     } | ConvertTo-Json -Depth 5 -Compress
 
-    $param = @{
-        Uri     = "https://api.openai.com/v1/chat/completions"
-        Headers = $headers
-        Method  = "Post"
-        Body    = $body
-    }
+#     $headers = @{
+#         "Content-Type"  = "application/json"
+#         "Authorization" = "Bearer $APIKey"
+#     }
 
-    $result = @()
+#     $param = @{
+#         Uri     = "https://api.openai.com/v1/chat/completions"
+#         Headers = $headers
+#         Method  = "Post"
+#         Body    = $body
+#     }
 
-    do {
-        try {
-            $response = Invoke-RestMethod @param
-            if ($null -ne $response) {
-                if ($null -ne $response.error) {
-                    throw [System.Exception]::new($response.error.message)
-                }
-                else {
-                    $result += $response.choices[0].message.content
+#     try {
+#         $response = Invoke-RestMethod @param
+#         if ($null -ne $response) {
+#             if ($null -ne $response.error) {
+#                 throw [System.Exception]::new($response.error.message)
+#             }
+#             else {
+#                 return $response.choices[0].message.content
+#             }
+#         }
+#         else {
+#             throw [System.Exception]::new("An unexpected error occurred. The response was null.")
+#         }
+#     }
+#     catch {
+#         if($true -eq $global:DEBUG) {
+#             Write-Host "An error occurred: $_" -ForegroundColor Red
+#             Write-Host ($param) -ForegroundColor Yellow
+#         } else {
+#             Write-Host "An error occurred: $($_.Exception.ToString())" -ForegroundColor Red
+#         }
+#         return $null
+#     }
+# }
+# function Send-OpenAICompletion2 {
+#     param (
+#         [string]$Prompt,
+#         [int]$MaxTokens = 500,
+#         [double]$Temperature = 0.8,
+#         [string]$APIKey,
+#         [switch]$Paginate
+#     )
 
-                    if ($Paginate -and $response.choices[0].finish_reason -ne 'stop') {
-                        $newResult = Send-OpenAICompletion -Prompt $Prompt -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $APIKey -Paginate
-                        if ($null -ne $newResult) {
-                            $result += $newResult
-                        }
-                    }
-                    else {
-                        break
-                    }
-                }
-            }
-            else {
-                throw [System.Exception]::new("An unexpected error occurred. The response was null.")
-            }
-        }
-        catch {
-            Write-Host "An error occurred: $($_.Exception.Message)" -ForegroundColor Red
-            Exit 1
-        }
-    } until (!$Paginate)
+#     $global:ChatHistory += @{
+#         role    = "user"
+#         content = $Prompt
+#     }
+#     $body = @{
+#         model       = $global:Model
+#         messages    = $global:ChatHistory
+#         temperature = $Temperature
+#         max_tokens  = $MaxTokens
+#         n           = 1
+#         stop        = $null
+#     } | ConvertTo-Json -Depth 5 -Compress
 
-    return $result -join ' '
-}
+#     $headers = @{
+#         "Content-Type"  = "application/json"
+#         "Authorization" = "Bearer $APIKey"
+#     }
+
+#     $param = @{
+#         Uri     = "https://api.openai.com/v1/chat/completions"
+#         Headers = $headers
+#         Method  = "Post"
+#         Body    = $body
+#     }
+
+#     $result = @()
+
+#     do {
+#         try {
+#             $response = Invoke-RestMethod @param
+#             if ($null -ne $response) {
+#                 if ($null -ne $response.error) {
+#                     throw [System.Exception]::new($response.error.message)
+#                 }
+#                 else {
+#                     $result += $response.choices[0].message.content
+
+#                     if ($Paginate -and $response.choices[0].finish_reason -ne 'stop') {
+#                         $newResult = Send-OpenAICompletion -Prompt $Prompt -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $APIKey -Paginate
+#                         if ($null -ne $newResult) {
+#                             $result += $newResult
+#                         }
+#                     }
+#                     else {
+#                         break
+#                     }
+#                 }
+#             }
+#             else {
+#                 throw [System.Exception]::new("An unexpected error occurred. The response was null.")
+#             }
+#         }
+#         catch {
+#             Write-Host "An error occurred: $($_.Exception.Message)" -ForegroundColor Red
+#             Exit 1
+#         }
+#     } until (!$Paginate)
+
+#     return $result -join ' '
+# }
 function Get-OpenAICompletion {
     param (
         [string]$Prompt,
         [int]$MaxTokens = 500,
         [double]$Temperature = 0.8,
-        [bool]$savePrompt = $true
+        [bool]$SavePrompt = $true,
+        [bool]$SaveResponse = $true
     )
 
     $configFilePath = ".\paullygpt\paullygpt.config.json"
@@ -145,7 +255,7 @@ function Get-OpenAICompletion {
         Exit 1
     }
 
-    $result = Send-OpenAICompletion -Prompt $Prompt -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $apiKey -savePrompt $savePrompt 
+    $result = Send-OpenAICompletion -Prompt $Prompt -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $apiKey -SavePrompt $SavePrompt -SaveResponse $SaveResponse
     $isSVG = $result -match "(?s)<svg.*?</svg>"
     #i want to refactor the if below to properly check for null or empty svgmarkup
     if ($isSVG -eq $true) {
@@ -164,25 +274,30 @@ function Reset-GPT {
 }
 function Get-GPT {
     param(
-        [string]$prompt
+        [string]$prompt,
+        [bool]$SavePrompt = $true,
+        [bool]$SaveResponse = $true
     )
-    $completion = Get-GPTQuiet -Prompt $prompt
-    $global:ChatHistory += @{ role = "assistant"; content = $completion }
+    $completion = Get-OpenAICompletion -Prompt $prompt -SavePrompt $SavePrompt -SaveResponse $SaveResponse
     return $completion
 }
 function Get-GPTQuiet {
     param(
-        [string]$prompt
+        [string]$prompt,
+        [bool]$SavePrompt = $true,
+        [bool]$SaveResponse = $false
     )
-    $completion = Get-OpenAICompletion -Prompt $prompt
+    $completion = Get-OpenAICompletion -Prompt $prompt -SavePrompt $SavePrompt -SaveResponse $SaveResponse
     return $completion
 }
 
 function Get-GPTandForget {
     param(
-        [string]$prompt
+        [string]$prompt,
+        [bool]$SavePrompt = $false,
+        [bool]$SaveResponse = $false
     )
-    $completion = Get-OpenAICompletion -Prompt $prompt -savePrompt $false
+    $completion = Get-OpenAICompletion -Prompt $prompt -SavePrompt $SavePrompt -SaveResponse $SaveResponse
     return $completion
 }
 function Get-ValidAPIKey {
@@ -197,7 +312,7 @@ function Get-ValidAPIKey {
         $APIKey = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($apiKeySecure))
 
         # Use Send-OpenAICompletion to validate the provided API key
-        $testResponse = Send-OpenAICompletion -Prompt "Test API key" -APIKey $APIKey
+        $testResponse = Send-OpenAICompletion -Prompt "Test API key" -APIKey $APIKey -SavePrompt $false -SaveResponse $false
         if ($null -ne $testResponse.error) {
             Write-Host "Invalid API key provided. Please try again."
             return $null

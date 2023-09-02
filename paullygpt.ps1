@@ -6,7 +6,7 @@ Import-Module .\PromptInteractionModule.psm1
 Import-Module .\SpecialFXModule.psm1
 Import-Module .\PaullyGPT.psm1
 
-$global:DEBUG = $false
+$global:DEBUG = $true
 
 $global:YOUDONTMIND_SOUND = $false
 if($global:YOUDONTMIND_SOUND){ 
@@ -15,11 +15,11 @@ if($global:YOUDONTMIND_SOUND){
 
 $dateTime = Get-Date
 $timestamp = $dateTime.ToString()
-$dayOfWeek = $dateTime.DayOfWeek
+$dayOfWeek = $dateTime.DayOfWeek`
 
 #MINIMALIST DIRECTIVE MODE
 $firstPrompt = "Say hello, mention it's $timestamp, the day of the week is $dayOfWeek, please briefly introduce yourself, ask name, ask what areas 'do you need help with?', and follow with one empty lines and share an insightful quote based on your character."
-$directives = "Be a helpful assistant and advisor who can resume conversations with notes from previous sessions."
+$directives = "Be a helpful assistant and advisor running in a Powershell script coincidentally called PaullyGPT who can resume conversations with notes from previous sessions."
 Invoke_PaullyGPT_V1 -Directives $directives -FirstPrompt $firstPrompt -ResumeLastSession $true
 
 #Runs best with Visual Studio Code with Run command and Powershell extensions installed.

@@ -22,7 +22,10 @@ Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to en
 * Access an example Windows shortcut Link to launch the application with ease.
 
 ![PaullyGPT client in Powershell](images/paullygpt1.png)
+## Updates 
 
+* v1.0.12 - Bunch of OpenAI call related things automatic multi-page response handling, also if the message history gets too large, it will attempt three times by removing the message with largest content, enabled utf-8 encoding by default.  Added !remove \[index\] command to remove !history items by index.
+* v1.0.11 - Resume Conversation enabled
 ## BONUS - INDYGPT - A choose your own procedurally generated text based adventures game - Unlimited Adventure and Customizable
 * INDYGPT.ps1 is an engaging text-adventure encounter based on Indiana Jones as example of the power of OpenAI GPT directives and PaullyGPT Powershell module. Every adventure is completely generated on the fly and sprinkled with exciting dialog and descriptive details.
 
