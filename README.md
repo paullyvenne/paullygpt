@@ -20,6 +20,7 @@ Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to en
 * Effortlessly paste multiline text into Windows Terminal, streamlining your workflow.
 * Get started right away by simply entering your OpenAI API Key - no delays or complications.
 * Access an example Windows shortcut Link to launch the application with ease.
+* A great tool to test prompt engineering scenarios.
 
 ![PaullyGPT client in Powershell](images/paullygpt1.png)
 ## Updates 
