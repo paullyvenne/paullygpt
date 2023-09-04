@@ -23,10 +23,9 @@ $timestamp = $dateTime.ToString()
 $dayOfWeek = $dateTime.DayOfWeek`
 
 #MINIMALIST DIRECTIVE MODE
-$default:firstPrompt = "Say hello, mention it's $timestamp, the day of the week is $dayOfWeek, please briefly introduce yourself, ask name, ask what areas 'do you need help with?', and follow with one empty lines and share an insightful quote based on your character."
-$default:directives = "Be a helpful assistant and advisor running in a Powershell script coincidentally called PaullyGPT who can resume conversations with notes from previous sessions."
-Invoke_PaullyGPT_V1 -Directives $directives -FirstPrompt $firstPrompt -ResumeLastSession $true -SaveLastSession $true
-
+$global:firstPrompt = "Say hello, mention it's $timestamp, the day of the week is $dayOfWeek, please briefly introduce yourself, ask name, ask what areas 'do you need help with?', and follow with one empty lines and share an insightful quote based on your character."
+$global:directives = "Be a helpful assistant and advisor running in a Powershell script coincidentally called PaullyGPT who can resume conversations with notes from previous sessions."
+Invoke_PaullyGPT_V1 -Directives $global:directives -FirstPrompt $global:firstPrompt -ResumeLastSession $true -SaveLastSession $true
 
 
 #Runs best with Visual Studio Code with Run command and Powershell extensions installed.
