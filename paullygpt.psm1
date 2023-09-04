@@ -9,7 +9,7 @@ Import-Module .\SpecialFXModule.psm1
 # Import the HTML Agility Pack module
 # Import-Module -Name HtmlAgilityPack
 
-$global:version = "1.0.12"
+$global:version = "1.0.14"
 $global:DEBUG = $false
 
 # Define the global variables
@@ -23,11 +23,28 @@ $dateTime = Get-Date
 $timestamp = $dateTime.ToString()
 $dayOfWeek = $dateTime.DayOfWeek
 
-$shutDownRegistered = $false
+#$shutDownRegistered = $false
 
 $transcriptPath = ".\paullygpt\transcript.log.txt"
 $transcriptPath2 = ".\paullygpt\transcript.summary.txt"
 $transcriptPath3 = ".\paullygpt\transcript.json"
+
+function Yo_Paully{
+    Param(
+        [Parameter(Mandatory=$true)]
+        [string]$prompt,
+        [string]$directives = "You are running inside of a Powershell script commandline named Yo_Paully, keep commentary to a minimal like you are a fucntion. ",
+        [bool]$memorizeLast = $true,
+        [bool]$clearHistory = $false,
+        [int]$maxTokens = 700,
+        [float]$temperature = 0.8
+    )
+
+    $global:MaxTokens = $maxTokens
+    $global:Temperature = $temperature
+    $resumeLastSession = ($ClearHistory -eq $true)
+    return Invoke_PaullyGPT_V1 -Directives $directives -FirstPrompt $prompt -ResumeLastSession $resumeLastSession -SaveLastSession $memorizeLast -IsCLI $true
+}
 
 # Define the global functions
 #-------------------------------------------------------
@@ -35,10 +52,12 @@ $transcriptPath3 = ".\paullygpt\transcript.json"
 #-------------------------------------------------------
 function Invoke_PaullyGPT_V1 {
     param(
-        [bool] $resumeLastSession = $false,
-        [bool] $saveLastSession = $false,
+        [bool]$IsCLI = $false,
+        [bool]$resumeLastSession = $false,
+        [bool]$saveLastSession = $false,
         [string]$firstPrompt = "Say hello, mention it's $timestamp, the day of the week is $dayOfWeek, please briefly introduce yourself, ask name, ask what areas 'do you need help with?', and follow with one empty lines and share an insightful quote based on your character. ",
         [string]$directives = "
+        
     Follow these directives:
         1. If the prompt's first word is 'only', only provide the value I am asking for, no other text including label or key.
         2. You are outputting in PowerShell, so make accommodations in output for a terminal width of $width characters.
@@ -64,10 +83,13 @@ function Invoke_PaullyGPT_V1 {
     $ratio = 4.2
     $spaces = (" " * ($Host.UI.RawUI.WindowSize.Width / $ratio))
 
-    #Clear-Host
-    Write-Host "$spaces-===============[" -NoNewline
-    Write-Host "PaullyGPT for Powershell $global:version" -ForegroundColor Red -NoNewline
-    Write-Host "]===============-"
+
+    if($IsCLI -ne $true) {
+        #Clear-Host
+        Write-Host "$spaces-===============[" -NoNewline
+        Write-Host "PaullyGPT for Powershell $global:version" -ForegroundColor Red -NoNewline
+        Write-Host "]===============-"
+    }
 
     #Load the config file or initialize if needed
     Get-PaullyGPTConfig > $null
@@ -116,7 +138,7 @@ function Invoke_PaullyGPT_V1 {
     # Start-Transcript -Path $transcriptPath -NoClobber
     # Write-Host "Notice: Summary of last conversations only works if you exit normally or use the !memorize command."
 
-    if ($false -eq $global:DEBUG) {
+    if ($IsCLI -eq $false -and $global:DEBUG -eq $false) {
         #Generating a transcript log named from the current date and time
 
         #Optional ASCII Art App Banner
@@ -137,7 +159,7 @@ function Invoke_PaullyGPT_V1 {
         # Write-Host $aboutme -ForegroundColor Cyan
     }
     else {
-        $global:speechEnabled = $true
+        $global:speechEnabled = ($IsCLI -eq $false)
     }
 
     if($true -eq $resumeLastSession) {
@@ -173,8 +195,7 @@ function Invoke_PaullyGPT_V1 {
 
 #(!$myprompt.StartsWith("!")) -and 
         
-        if ($null -ne $myprompt -and -not ($myprompt -like "`n*")) {
-            $startTime = Get-Date
+        if($IsCLI -eq $true) {
             $answer = Get-GPT $myprompt  
 
             if(($true -eq $saveLastSession) -and ($myprompt -ne $firstPrompt)) {
@@ -183,34 +204,47 @@ function Invoke_PaullyGPT_V1 {
                 $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
                 $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
             }
-
-            $finishTime = Get-Date
-            $totalSeconds = [Math]::Round(($finishTime).Subtract($startTime).TotalSeconds, 1)
-            Write-Host " $totalSeconds seconds." -ForegroundColor Cyan                                                  #OPENAI MAGIC returned into variable => $answer to reuse
-            Write-Host "`n$answer`n" -ForegroundColor Blue
-            # Write-Storage -Message $answer
-            SpeakAsync $answer
-        }
-
-        # if($false -eq $shutDownRegistered) {
-        #     # Register the event handler for the Exit event
-        #     $null = Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action $shutdown 
-        #     $shutDownRegistered = $true
-        # }
-
-        #display prompt, catch escape key to exit
-        #Write-Host "`n(•̀ᴗ•́)و " -ForegroundColor Yellow
-        Write-Host "[(ESC to exit, CTRL-T to Mute, or type !help)]" -ForegroundColor DarkGray
-        
-        $myprompt = Read-TextWithEscape "[ Your Response ]=>> "
-        if ($null -eq $myprompt) {
-            #if prompt is null, exit                      
-            shutDown
-            break
+            return $answer
         } else {
-            Start-Transcript -Path $transcriptPath -Append | Out-Null
-        }
+            if ($null -ne $myprompt -and -not ($myprompt -like "`n*")) {
+                $startTime = Get-Date
+                $answer = Get-GPT $myprompt  
 
+                if(($true -eq $saveLastSession) -and ($myprompt -ne $firstPrompt)) {
+                    $directory = ".\paullygpt\"
+                    $lastPathJson = $directory + "last.json"
+                    $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
+                    $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
+                }
+
+                $finishTime = Get-Date
+                $totalSeconds = [Math]::Round(($finishTime).Subtract($startTime).TotalSeconds, 1)
+                Write-Host " $totalSeconds seconds." -ForegroundColor Cyan                                                  #OPENAI MAGIC returned into variable => $answer to reuse
+                Write-Host "`n$answer`n" -ForegroundColor Blue
+                # Write-Storage -Message $answer
+                SpeakAsync $answer
+            }
+
+
+            # if($false -eq $shutDownRegistered) {
+            #     # Register the event handler for the Exit event
+            #     $null = Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action $shutdown 
+            #     $shutDownRegistered = $true
+            # }
+
+            #display prompt, catch escape key to exit
+            #Write-Host "`n(•̀ᴗ•́)و " -ForegroundColor Yellow
+            Write-Host "[(ESC to exit, CTRL-T to Mute, or type !help)]" -ForegroundColor DarkGray
+            
+            $myprompt = Read-TextWithEscape "[ Your Response ]=>> "
+            if ($null -eq $myprompt) {
+                #if prompt is null, exit                      
+                shutDown
+                break
+            } else {
+                Start-Transcript -Path $transcriptPath -Append | Out-Null
+            }
+        }
     }
     Write-Host "For more information, visit http://github.com/paullyvenne/paullygpt."               #display exit message
     Exit 1 #App exit code 1 = normal exit, 0 = error exit
@@ -514,7 +548,7 @@ function LearnFromSourceGPT {
     $lastCount = $global:ChatHistory.Count
     $analysis = Get-GPT "Give me a compact detailed analysis of snippet '$hash' from source '$source' which contains : ``````$encoded_contents``````"
     if($global:ChatHistory.Count -gt 0) {
-        $filteredArray = $global:ChatHistory | Where-Object { $_.role -ne "user" -or !$_.content.StartsWith($hash) }
+        $filteredArray = $global:ChatHistory | Where-Object { $_.role -ne "user" -and !$_.content.StartsWith($hash) }
         $global:ChatHistory = $filteredArray
     }
 
@@ -549,3 +583,6 @@ function Pop_History {
     $global:ChatHistory = @($global:ChatHistory | Select-Object -SkipLast 1)
     return $last
 }
+
+#q: which line is the error "ParserError: Unexpected token '(' in expression or statement." on?
+#a: 

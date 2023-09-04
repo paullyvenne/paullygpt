@@ -24,7 +24,8 @@ Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to en
 
 ![PaullyGPT client in Powershell](images/paullygpt1.png)
 ## Updates 
-
+* v1.0.14 - Introducing NEW PowerShell CLI Method - Yo_Paully [prompt], calls the PaullyGPT engine via command line instead of traditional conversation loop.
+* v1.0.13 - I'll skip this time. Maybe I'm supersitious! 
 * v1.0.12 - Bunch of OpenAI call related things automatic multi-page response handling, also if the message history gets too large, it will attempt three times by removing the message with largest content, enabled utf-8 encoding by default.  Added !remove \[index\] command to remove !history items by index.
 * v1.0.11 - Resume Conversation enabled
 ## BONUS - INDYGPT - A choose your own procedurally generated text based adventures game - Unlimited Adventure and Customizable
@@ -38,6 +39,7 @@ Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to en
 2. Once all files are unzipped, launch the Run PaullyGPT.lnk shortcut link to launch Powershell with -ExecutionPolicy Bypass to get running or it may fail. (Note: If the shortcut fails to run the script, try to adjust the shortcut's START directory path to point to the PaullyGPT folder as needed, it might be stuck on a default value I had locally. You can modify the Start Path of the shortcut by right-clicking on and choosing Properties.) ** If you run into security popup, see notes below on how to UNBLOCK files downloaded from the internet on some Windows OSs.
 4. The first time it is run, you will be required to enter a valid OPENAI API KEY, right-click or Ctrl-V to paste from your clipboard.
 5. While using PaullyGPT, it will create a subfolder to contain transcript logs of the session as well as a config file containing the APIKEY to access OPENAI for future user.
+6. If you prefer to use the command-line ensure the module is loaded, (e.g. Import_Module .\PaullyGPT.PSM1) and then use the command line Yo_Paully with various parameters (e.g. Yo_Paully "How you do'n?")
 
 ## Easy to Configure and Customize Behavior
 ```powershell
