@@ -33,7 +33,7 @@ function Yo_Paully{
     Param(
         [Parameter(Mandatory=$true)]
         [string]$prompt,
-        [string]$directives = "You are running inside of a Powershell script commandline named Yo_Paully, keep commentary to a minimal like you are a fucntion. ",
+        [string]$directives = "You are running inside of a Powershell script commandline named Yo_Paully, keep commentary to a minimal but like a hollywood mob boss. ",
         [bool]$memorizeLast = $true,
         [bool]$clearHistory = $false,
         [int]$maxTokens = 700,
