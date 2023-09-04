@@ -33,17 +33,15 @@ function Yo_Paully{
     Param(
         [Parameter(Mandatory=$true)]
         [string]$prompt,
-        [string]$directives = "You are running inside of a Powershell script commandline named Yo_Paully, keep commentary to a minimal but like a hollywood mob boss. ",
-        [bool]$memorizeLast = $true,
-        [bool]$clearHistory = $false,
+        [string]$directives = "You are running inside of a Powershell script commandline named Yo_Paully, like your talking to Boss Paully, keep commentary to a minimal but colorful.",
+        [bool]$resume = $true,
         [int]$maxTokens = 700,
         [float]$temperature = 0.8
     )
 
     $global:MaxTokens = $maxTokens
     $global:Temperature = $temperature
-    $resumeLastSession = ($ClearHistory -eq $true)
-    return Invoke_PaullyGPT_V1 -Directives $directives -FirstPrompt $prompt -ResumeLastSession $resumeLastSession -SaveLastSession $memorizeLast -IsCLI $true
+    return Invoke_PaullyGPT_V1 -Directives $directives -FirstPrompt $prompt -ResumeLastSession $resume -SaveLastSession $resume -IsCLI $true
 }
 
 # Define the global functions
@@ -52,9 +50,10 @@ function Yo_Paully{
 #-------------------------------------------------------
 function Invoke_PaullyGPT_V1 {
     param(
-        [bool]$IsCLI = $false,
+        [bool]$isCLI = $false,
         [bool]$resumeLastSession = $false,
         [bool]$saveLastSession = $false,
+        [string]$sessionFile = "last.json",
         [string]$firstPrompt = "Say hello, mention it's $timestamp, the day of the week is $dayOfWeek, please briefly introduce yourself, ask name, ask what areas 'do you need help with?', and follow with one empty lines and share an insightful quote based on your character. ",
         [string]$directives = "
         
@@ -84,7 +83,7 @@ function Invoke_PaullyGPT_V1 {
     $spaces = (" " * ($Host.UI.RawUI.WindowSize.Width / $ratio))
 
 
-    if($IsCLI -ne $true) {
+    if($isCLI -ne $true) {
         #Clear-Host
         Write-Host "$spaces-===============[" -NoNewline
         Write-Host "PaullyGPT for Powershell $global:version" -ForegroundColor Red -NoNewline
@@ -92,7 +91,7 @@ function Invoke_PaullyGPT_V1 {
     }
 
     #Load the config file or initialize if needed
-    Get-PaullyGPTConfig > $null
+    Get-PaullyGPTConfig | Out-Null
 
     #Launch-HTTPListener -Port 8080 -Verbose:$false
     #PromptSettings
@@ -138,7 +137,7 @@ function Invoke_PaullyGPT_V1 {
     # Start-Transcript -Path $transcriptPath -NoClobber
     # Write-Host "Notice: Summary of last conversations only works if you exit normally or use the !memorize command."
 
-    if ($IsCLI -eq $false -and $global:DEBUG -eq $false) {
+    if ($isCLI -eq $false -and $global:DEBUG -eq $false) {
         #Generating a transcript log named from the current date and time
 
         #Optional ASCII Art App Banner
@@ -159,11 +158,11 @@ function Invoke_PaullyGPT_V1 {
         # Write-Host $aboutme -ForegroundColor Cyan
     }
     else {
-        $global:speechEnabled = ($IsCLI -eq $false)
+        $global:speechEnabled = ($isCLI -eq $false)
     }
 
     if($true -eq $resumeLastSession) {
-        $myprompt = Recall_Conversation_History -DefaultPrompt $firstPrompt
+        $myprompt = Recall_Conversation_History -SessionFile $sessionFile  -DefaultPrompt $firstPrompt -IsCLI $isCLI
     } else {
         $myprompt = $firstPrompt
     }
@@ -195,12 +194,12 @@ function Invoke_PaullyGPT_V1 {
 
 #(!$myprompt.StartsWith("!")) -and 
         
-        if($IsCLI -eq $true) {
+        if($isCLI -eq $true) {
             $answer = Get-GPT $myprompt  
 
-            if(($true -eq $saveLastSession) -and ($myprompt -ne $firstPrompt)) {
+            if($saveLastSession -eq $true) {
                 $directory = ".\paullygpt\"
-                $lastPathJson = $directory + "last.json"
+                $lastPathJson = $directory + $sessionFile
                 $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
                 $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
             }
@@ -212,7 +211,7 @@ function Invoke_PaullyGPT_V1 {
 
                 if(($true -eq $saveLastSession) -and ($myprompt -ne $firstPrompt)) {
                     $directory = ".\paullygpt\"
-                    $lastPathJson = $directory + "last.json"
+                    $lastPathJson = $directory + $sessionFile
                     $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
                     $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
                 }
@@ -271,8 +270,13 @@ function shutDown {
 }
 
 function Recall_Conversation_History {
-    Param([string]$DefaultPrompt)
-    $lastPath = ".\paullygpt\last.json"
+    Param(
+    [string]$sessionFile,
+    [string]$defaultPrompt,
+    [bool]$isCLI = $false    
+    )
+
+    $lastPath = ".\paullygpt\" + $sessionFile
     if($true -eq (Test-Path $lastPath)) {
         $dateTime = Get-Date
         $file = Get-Item -Path $lastPath
@@ -286,13 +290,16 @@ function Recall_Conversation_History {
                     $global:ChatHistory = @($newJson)
                 } else {
                     $global:ChatHistory = $newJson
-                    $prompt = "Welcome the user and introduce yourself, based on the memory, show a summary of discussed topics and ask the user to begin a question. Keep adding to the list of discussed topics"
+                    $prompt = $defaultPrompt
+                    if($isCLI -eq $false) {
+                        $prompt = "Welcome the user and introduce yourself, based on the memory, show a summary of discussed topics and ask the user to begin a question. Keep adding to the list of discussed topics"
+                    }
                     return $prompt
                 }
             }
         }
     }
-    return $firstPrompt
+    return $defaultPrompt
 }
 
 function Recall_Last_Prompt {
@@ -420,7 +427,7 @@ function Invoke-PaullyGPTCommand {
 
         { $mycommand -like "recall*"} { 
             #restore memory
-            $myprompt = Recall_Conversation_History 
+            $myprompt = Recall_Conversation_History -SessionFile $sessionFile 
             break }
 
         { $mycommand -like "url:*" } {
@@ -583,6 +590,3 @@ function Pop_History {
     $global:ChatHistory = @($global:ChatHistory | Select-Object -SkipLast 1)
     return $last
 }
-
-#q: which line is the error "ParserError: Unexpected token '(' in expression or statement." on?
-#a: 
