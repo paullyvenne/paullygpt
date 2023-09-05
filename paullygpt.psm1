@@ -507,7 +507,7 @@ function Invoke-PaullyGPTCommand {
         { $mycommand -like "recall*" } { 
             #restore memory
             $inFile = ($mycommand -replace "recall", "").Trim()
-            if ($false -eq [string]::isNullOrEmpty($outfile)) {
+            if ($false -eq [string]::isNullOrEmpty($inFile)) {
                 if ($inFile.StartsWith(":")) {
                     $inFile = $inFile.Substring(1, $inFile.Length - 1).Trim() #remove first :
                 }
@@ -516,7 +516,7 @@ function Invoke-PaullyGPTCommand {
                 $inFile = $SessionFile
             }
             Recall_Conversation_History -SessionFile $inFile -IsCLI $IsCLI
-            $myprompt = Summarize_Conversation 
+            $myprompt = Summarize_Conversation
             break 
         }
 
