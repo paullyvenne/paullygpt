@@ -165,7 +165,16 @@ function Invoke_PaullyGPT_V1 {
     }
 
     if ($true -eq $ResumeLastSession) {
-        $myprompt = Recall_Conversation_History -SessionFile $SessionFile  -DefaultPrompt $FirstPrompt -IsCLI $IsCLI
+
+        if($IsCLI -eq $true) {
+            if($FirstPrompt -like "!recall:*") {
+                $SessionFile = ($FirstPrompt -replace "!recall:", "").Trim()
+            }
+            Recall_Conversation_History -SessionFile $SessionFile  -DefaultPrompt $FirstPrompt -IsCLI $IsCLI | Out-Null
+            $myprompt = Summarize_Conversation
+        } else {
+            $myprompt = Recall_Conversation_History -SessionFile $SessionFile  -DefaultPrompt $FirstPrompt -IsCLI $IsCLI 
+        }
     }
     else {
         $myprompt = $FirstPrompt
@@ -303,6 +312,7 @@ function Recall_Conversation_History {
             if ($newJson.Count -gt 0) {
                 if ($newJson.Count -eq "1") {
                     $global:ChatHistory = @($newJson)
+                    return $newJson
                 }
                 else {
                     $global:ChatHistory = $newJson
@@ -444,7 +454,7 @@ function Invoke-PaullyGPTCommand {
             $indexToRemove = ($mycommand -replace "remove", "").Trim()
             $global:ChatHistory = $global:ChatHistory | Where-Object { $global:ChatHistory.IndexOf($_) -ne $indexToRemove }
             if ($IsCLI -eq $true) {
-                return "-1 Pop goes the weasel!"
+                #return "-1 Pop goes the weasel!"#
             }
             Write-Host "-1 Pop goes the weasel!" -ForegroundColor Green
         }
@@ -467,7 +477,7 @@ function Invoke-PaullyGPTCommand {
                     }
                 }
                 if ($IsCLI -eq $true) {
-                    return "-1 Pop goes the weasel!"
+                    #return "-1 Pop goes the weasel!"
                 }
                 Write-Host "-1 Pop goes the weasel!" -ForegroundColor Green
                 $myprompt = $null
@@ -505,7 +515,8 @@ function Invoke-PaullyGPTCommand {
             else {
                 $inFile = $SessionFile
             }
-            $myprompt = Recall_Conversation_History -SessionFile $inFile -IsCLI $IsCLI
+            Recall_Conversation_History -SessionFile $inFile -IsCLI $IsCLI
+            $myprompt = Summarize_Conversation 
             break 
         }
 
@@ -601,7 +612,7 @@ function Invoke-PaullyGPTCommand {
                     if ($global:ChatHistory.Length -gt 0) {
                         $global:ChatHistory = @(@{ role = "system"; content = $Directives; })
                         if ($IsCLI -eq $true) {
-                            return "Cleared!"
+                            #return "Cleared!"
                         }
                         Write-Host "Cleared!" -ForegroundColor Green
                     }
