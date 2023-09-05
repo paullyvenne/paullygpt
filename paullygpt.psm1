@@ -192,13 +192,18 @@ function Invoke_PaullyGPT_V1 {
         if ($myprompt -like "!*" ) {
             $mycommand = [string]::new($myprompt).Substring(1, $myprompt.Length - 1).Trim()
             Write-Host "`n" -NoNewline
-            $myprompt = Invoke-PaullyGPTCommand -Command $mycommand -Directives $Directives
+            $myprompt = Invoke-PaullyGPTCommand -Command $mycommand -Directives $Directives -IsCLI $IsCLI
         }
 
 #(!$myprompt.StartsWith("!")) -and 
         
         if($IsCLI -eq $true) {
-            $answer = Get-GPT $myprompt  
+            
+            if($null -ne $myprompt) {
+                $answer = Get-GPT $myprompt  
+            } else {
+                $answer = $global:ChatHistory[$global:ChatHistory.Count - 1]
+            }
 
             if($SaveLastSession -eq $true) {
                 $directory = ".\paullygpt\"
@@ -356,7 +361,8 @@ function Save_Summary {
 function Invoke-PaullyGPTCommand {
     Param(
         [string]$Directives,
-        [string]$Command
+        [string]$Command,
+        [bool]$IsCLI = $false  
     )
 
     $mycommand = $Command
@@ -416,7 +422,16 @@ function Invoke-PaullyGPTCommand {
                 $global:ChatHistory | ConvertTo-Json | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
                 $global:ChatHistory | ConvertTo-Json | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
                 Write-Host "-1 Pop goes the weasel!" -ForegroundColor Green
-                Invoke-PaullyGPTCommand -Directives $Directives -Command "!history"
+                if ($global:ChatHistory.Count -gt 0) {
+                    foreach ($message in $global:ChatHistory) {
+                        # Only show the role and content
+                        $roleName = $message.Role
+                        $content = $message.Content
+                        $timestamp = $message.timestamp
+                        Write-Host "{$timestamp} {$roleName}: $content" -ForegroundColor Green
+                    }
+                }
+                $prompt = $null
             }
             break
         }
@@ -495,17 +510,22 @@ function Invoke-PaullyGPTCommand {
                 $directive = ($mycommand -replace "reset", "").Trim()
             }
             if ($false -eq [string]::IsNullOrEmpty($directive)) {
-                $confirmation = Read-Host "Are you sure you want to clear history and reset directives? (Y/N)"
+                $confirmation = "Y"
+                if($IsCLI -eq $false) {
+                    $confirmation = Read-Host "Are you sure you want to clear history? (Y/N)"
+                }
                 if ($confirmation -eq "Y") {
                     $global:ChatHistory = @(@{ role = "system"; content = $directive;})
                     Write-Host "Reset to: `n$directive" -ForegroundColor Green
                 }
             }
             else {
-                $confirmation = Read-Host "Are you sure you want to clear history? (Y/N)"
+                $confirmation = "Y"
+                if($IsCLI -eq $false) {
+                    $confirmation = Read-Host "Are you sure you want to clear history and reset directives? (Y/N)"
+                }
                 if ($confirmation -eq "Y") {
                     if ($global:ChatHistory.Length -gt 0) {
-                        #$global:ChatHistory = @($global:ChatHistory | Select-Object -First 1)
                         $global:ChatHistory = @(@{ role = "system"; content = $Directives;})
                         Write-Host "Cleared!" -ForegroundColor Green
                     }
@@ -589,6 +609,6 @@ function ExtractHtmlInnerText {
 
 function Pop_History {
     $last = @($global:ChatHistory | Select-Object -Last 1)
-    $global:ChatHistory = @($global:ChatHistory | Select-Object -SkipLast 1)
+    $global:ChatHistory = $global:ChatHistory[0..($global:ChatHistory.Length - 2)]
     return $last
 }
