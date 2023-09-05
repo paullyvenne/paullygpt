@@ -9,7 +9,7 @@ Import-Module .\SpecialFXModule.psm1
 # Import the HTML Agility Pack module
 # Import-Module -Name HtmlAgilityPack
 
-$global:version = "1.0.14"
+$global:version = "1.0.15"
 $global:DEBUG = $false
 
 # Define the global variables
