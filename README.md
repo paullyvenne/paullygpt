@@ -40,7 +40,7 @@ Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to en
 2. Once all files are unzipped, launch the Run PaullyGPT.lnk shortcut link to launch Powershell with -ExecutionPolicy Bypass to get running or it may fail. (Note: If the shortcut fails to run the script, try to adjust the shortcut's START directory path to point to the PaullyGPT folder as needed, it might be stuck on a default value I had locally. You can modify the Start Path of the shortcut by right-clicking on and choosing Properties.) ** If you run into security popup, see notes below on how to UNBLOCK files downloaded from the internet on some Windows OSs.
 4. The first time it is run, you will be required to enter a valid OPENAI API KEY, right-click or Ctrl-V to paste from your clipboard.
 5. While using PaullyGPT, it will create a subfolder to contain transcript logs of the session as well as a config file containing the APIKEY to access OPENAI for future user.
-6. If you prefer to use the command-line ensure the module is loaded, (e.g. Import_Module .\PaullyGPT.PSM1) and then use the command line Yo_Paully with various parameters (e.g. Yo_Paully "How you do'n?")
+6. If you prefer to use the command-line ensure the module is loaded, (e.g. Import_Module .\PaullyGPT.PSM1) and then use the command line Yo_Paully with various parameters (e.g. Yo_Paully "How you do'n?" or Yo_Paully "!memorize custom.json")
 
 ## Easy to Configure and Customize Behavior
 ```powershell
