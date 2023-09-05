@@ -509,10 +509,10 @@ function Invoke-PaullyGPTCommand {
             if($mycommand -like "reset*") {
                 $directive = ($mycommand -replace "reset", "").Trim()
             }
+            $confirmation = "Y"
             if ($false -eq [string]::IsNullOrEmpty($directive)) {
-                $confirmation = "Y"
                 if($IsCLI -eq $false) {
-                    $confirmation = Read-Host "Are you sure you want to clear history? (Y/N)"
+                    $confirmation = Read-Host "Are you sure you want to clear history and reset directives? (Y/N)"
                 }
                 if ($confirmation -eq "Y") {
                     $global:ChatHistory = @(@{ role = "system"; content = $directive;})
@@ -520,9 +520,8 @@ function Invoke-PaullyGPTCommand {
                 }
             }
             else {
-                $confirmation = "Y"
                 if($IsCLI -eq $false) {
-                    $confirmation = Read-Host "Are you sure you want to clear history and reset directives? (Y/N)"
+                    $confirmation = Read-Host "Are you sure you want to clear history? (Y/N)"
                 }
                 if ($confirmation -eq "Y") {
                     if ($global:ChatHistory.Length -gt 0) {
