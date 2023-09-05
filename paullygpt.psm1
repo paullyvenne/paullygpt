@@ -29,9 +29,9 @@ $transcriptPath = ".\paullygpt\transcript.log.txt"
 $transcriptPath2 = ".\paullygpt\transcript.summary.txt"
 $transcriptPath3 = ".\paullygpt\transcript.json"
 
-function Yo_Paully{
+function Yo_Paully {
     Param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$Prompt,
         [string]$Directives = "You are running inside of a Powershell script commandline named Yo_Paully, like your Boss Paully, keep commentary to a minimal but colorful.",
         [bool]$Resume = $true,
@@ -76,7 +76,7 @@ function Invoke_PaullyGPT_V1 {
         13. Keep track of our conversations in a json object with a message string array using more compact language.
         14. Update your json object with the properties about any information learned from our conversations.
         15. Please keep track of all topics and be ready with a summary at anytime with the latest topics and prompts."
-        )
+    )
 
     # Display the hosting process information
     # Write-Host "PowerShell is hosted by process:"
@@ -86,7 +86,7 @@ function Invoke_PaullyGPT_V1 {
     $spaces = (" " * ($Host.UI.RawUI.WindowSize.Width / $ratio))
 
 
-    if($IsCLI -ne $true) {
+    if ($IsCLI -ne $true) {
         #Clear-Host
         Write-Host "$spaces-===============[" -NoNewline
         Write-Host "PaullyGPT for Powershell $global:version" -ForegroundColor Red -NoNewline
@@ -164,9 +164,10 @@ function Invoke_PaullyGPT_V1 {
         $global:speechEnabled = ($IsCLI -eq $false)
     }
 
-    if($true -eq $ResumeLastSession) {
+    if ($true -eq $ResumeLastSession) {
         $myprompt = Recall_Conversation_History -SessionFile $SessionFile  -DefaultPrompt $FirstPrompt -IsCLI $IsCLI
-    } else {
+    }
+    else {
         $myprompt = $FirstPrompt
     }
     
@@ -174,10 +175,10 @@ function Invoke_PaullyGPT_V1 {
 
 
 
-# foreach ($line in $starLines) {
-#     $paddedLine = $line.PadRight($width)
-#     Write-Host $paddedLine -ForegroundColor Blue
-# }
+    # foreach ($line in $starLines) {
+    #     $paddedLine = $line.PadRight($width)
+    #     Write-Host $paddedLine -ForegroundColor Blue
+    # }
 
     #Begin the conversation loop
     while ($null -ne $myprompt) {
@@ -195,29 +196,34 @@ function Invoke_PaullyGPT_V1 {
             $myprompt = Invoke-PaullyGPTCommand -Command $mycommand -Directives $Directives -IsCLI $IsCLI
         }
 
-#(!$myprompt.StartsWith("!")) -and 
+        #(!$myprompt.StartsWith("!")) -and 
         
-        if($IsCLI -eq $true) {
+        if ($IsCLI -eq $true) {
             
-            if($null -ne $myprompt) {
+            if ($null -ne $myprompt) {
                 $answer = Get-GPT $myprompt  
-            } else {
-                $answer = $global:ChatHistory[$global:ChatHistory.Count - 1]
+                
+                if ($SaveLastSession -eq $true) {
+                    $directory = ".\paullygpt\"
+                    $lastPathJson = $directory + $SessionFile
+                    $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
+                    $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
+                }
+
+            }
+            else {
+                $answer = $global:ChatHistory[$global:ChatHistory.Count - 1].Content
             }
 
-            if($SaveLastSession -eq $true) {
-                $directory = ".\paullygpt\"
-                $lastPathJson = $directory + $SessionFile
-                $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
-                $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
-            }
+
             return $answer
-        } else {
+        }
+        else {
             if ($null -ne $myprompt -and -not ($myprompt -like "`n*")) {
                 $startTime = Get-Date
                 $answer = Get-GPT $myprompt  
 
-                if(($true -eq $SaveLastSession) -and ($myprompt -ne $FirstPrompt)) {
+                if (($true -eq $SaveLastSession) -and ($myprompt -ne $FirstPrompt)) {
                     $directory = ".\paullygpt\"
                     $lastPathJson = $directory + $SessionFile
                     $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
@@ -248,7 +254,8 @@ function Invoke_PaullyGPT_V1 {
                 #if prompt is null, exit                      
                 shutDown
                 break
-            } else {
+            }
+            else {
                 Start-Transcript -Path $transcriptPath -Append | Out-Null
             }
         }
@@ -279,27 +286,28 @@ function shutDown {
 
 function Recall_Conversation_History {
     Param(
-    [string]$SessionFile,
-    [string]$DefaultPrompt,
-    [bool]$IsCLI = $false    
+        [string]$SessionFile,
+        [string]$DefaultPrompt,
+        [bool]$IsCLI = $false    
     )
 
     $lastPath = ".\paullygpt\" + $SessionFile
-    if($true -eq (Test-Path $lastPath)) {
+    if ($true -eq (Test-Path $lastPath)) {
         $dateTime = Get-Date
         $file = Get-Item -Path $lastPath
         $lastWriteTime = $file.LastWriteTime
         $fileContents = Get-Content -Path $lastPath
         #resume last
-        if($null -ne $fileContents) {
+        if ($null -ne $fileContents) {
             $newJson = $fileContents | ConvertFrom-Json 
-            if($newJson.Count -gt 0) {
-                if($newJson.Count -eq "1") {
+            if ($newJson.Count -gt 0) {
+                if ($newJson.Count -eq "1") {
                     $global:ChatHistory = @($newJson)
-                } else {
+                }
+                else {
                     $global:ChatHistory = $newJson
                     $Prompt = $DefaultPrompt
-                    if($IsCLI -eq $false) {
+                    if ($IsCLI -eq $false) {
                         $Prompt = "Welcome the user and introduce yourself, based on the memory, show a summary of discussed topics and ask the user to begin a question. Keep adding to the list of discussed topics"
                     }
                     return $Prompt
@@ -312,15 +320,15 @@ function Recall_Conversation_History {
 
 function Recall_Last_Prompt {
     Param()
-    if($true -eq $ResumeLastSession) {
+    if ($true -eq $ResumeLastSession) {
         $lastPath = ".\paullygpt\last.summary.txt"
-        if($true -eq (Test-Path $lastPath)) {
+        if ($true -eq (Test-Path $lastPath)) {
             $dateTime = Get-Date
             $file = Get-Item -Path $lastPath
             $lastWriteTime = $file.LastWriteTime
             $fileContents = Get-Content -Path $lastPath
             #resume last
-            if($false -eq [string]::IsNullOrEmpty($fileContents)) {
+            if ($false -eq [string]::IsNullOrEmpty($fileContents)) {
                 $global:ChatHistory += @(@{ role = "assistant"; content = "today is $dateTime and previously on $lastWriteTime the following was discussed: ``````$fileContents``````" })
                 $prompt = "Welcome the user and introduce yourself, based on the memory, show a summary of discussed topics and ask the user to begin a question. Keep adding to the list of discussed topics"
                 return $prompt
@@ -339,18 +347,24 @@ function Summarize_Conversation {
 }
 
 function Save_Summary {
-    Param([string]$Path)
-    if($true -eq $SaveLastSession) {
+    Param([string]$Path,
+        [string]$SessionFile = "last.json",
+        [bool]$IsCLI = $false
+    )
+    if ($true -eq $SaveLastSession) {
         $directory = ".\paullygpt\"
         $fileName = Split-Path -Path $Path -Leaf
         # $fullPath = $directory + $fileName.Replace(".log.txt", ".summary.txt")
         # $lastPath = $directory + "last.summary.txt"
-        $lastPathJson = $directory + "last.json"
+        $lastPathJson = $directory + $SessionFile
         # $summary = Summarize_Conversation
         # $summary | Out-File -FilePath $fullPath -Encoding UTF8 -Force!me
         # $summary | Out-File -FilePath $lastPath -Encoding UTF8 -Force
         $global:ChatHistory | ConvertTo-Json | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
-        Write-Host "Saved memories to $lastPathJson." -ForegroundColor Green
+        $summary = "Saved memories to $lastPathJson."
+        if($IsCLI -eq $false) {
+            Write-Host $summary -ForegroundColor Green
+        }
     }
     return $summary
 }
@@ -371,7 +385,7 @@ function Invoke-PaullyGPTCommand {
     switch ($mycommand) {
 
         { $mycommand -like "help*" } { 
-            Write-Host "Commands: !help, !aboutme, !history, !memorize, !recall, !pop, !remove [index], !clear [newdirective], !load [filename], !exit" -ForegroundColor Green
+            Write-Host "Commands: !help, !aboutme, !history, !memorize [optional file], !recall, !pop, !remove [index], !clear [newdirective], !load [filename], !exit" -ForegroundColor Green
             Write-Host "Coming Soon: !savecode, !ls" -ForegroundColor Green
             break 
         }
@@ -384,34 +398,55 @@ function Invoke-PaullyGPTCommand {
 
         { $mycommand -like "aboutme*" } {
             if ($null -eq $aboutme) { $aboutme = Get-CurrentAgent }
+            if ($IsCLI -eq $true) {
+                return $aboutme
+            }
             Write-Host $aboutme -ForegroundColor Cyan
         }
         { $mycommand -like "history*" } {
             if ($global:ChatHistory.Count -gt 0) {
+                $ss = ""
                 foreach ($message in $global:ChatHistory) {
                     # Only show the role and content
                     $roleName = $message.Role
                     $content = $message.Content
                     $timestamp = $message.timestamp
-                    Write-Host "{$timestamp} {$roleName}: $content" -ForegroundColor Green
+                    $s = "{$timestamp} {$roleName}: $content"
+                    $ss += $s
+                    Write-Host $s -ForegroundColor Green
+                }
+                if ($IsCLI -eq $true) {
+                    return $ss
                 }
             }
             else {
-                "No Conversation."
+                $s = "No Conversation."
+                if ($IsCLI -eq $true) {
+                    return $s
+                }
+                Write-Host  -ForegroundColor Green
             }
             break
         }
-        { $mycommand -like "summarize*" -or $mycommand -like "summary*"} { 
+        { $mycommand -like "summarize*" -or $mycommand -like "summary*" } { 
             #Save memory
             if ($global:ChatHistory.Length -gt 1) {
-                $summary = Summarize_Conversation
-                Write-Host $summary -ForegroundColor Green
+                $analysis = Summarize_Conversation
+                if ($IsCLI -eq $true) {
+                    return $analysis
+                }
+                Write-Host $analysis -ForegroundColor Green
             }
-            break }
+            break 
+        }
 
         { $mycommand -like "remove*" } {
             $indexToRemove = ($mycommand -replace "remove", "").Trim()
             $global:ChatHistory = $global:ChatHistory | Where-Object { $global:ChatHistory.IndexOf($_) -ne $indexToRemove }
+            if ($IsCLI -eq $true) {
+                return "-1 Pop goes the weasel!"
+            }
+            Write-Host "-1 Pop goes the weasel!" -ForegroundColor Green
         }
 
         { $mycommand -like "pop*" -or $mycommand -like "removelast*" } {
@@ -421,7 +456,7 @@ function Invoke-PaullyGPTCommand {
                 $lastPathJson = $directory + $supportFile
                 $global:ChatHistory | ConvertTo-Json | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
                 $global:ChatHistory | ConvertTo-Json | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
-                Write-Host "-1 Pop goes the weasel!" -ForegroundColor Green
+                
                 if ($global:ChatHistory.Count -gt 0) {
                     foreach ($message in $global:ChatHistory) {
                         # Only show the role and content
@@ -431,25 +466,52 @@ function Invoke-PaullyGPTCommand {
                         Write-Host "{$timestamp} {$roleName}: $content" -ForegroundColor Green
                     }
                 }
-                $prompt = $null
+                if ($IsCLI -eq $true) {
+                    return "-1 Pop goes the weasel!"
+                }
+                Write-Host "-1 Pop goes the weasel!" -ForegroundColor Green
+                $myprompt = $null
             }
             break
         }
 
         { $mycommand -like "memorize*" } { 
+            $outFile = ($mycommand -replace "memorize", "").Trim()
+            if ($false -eq [string]::isNullOrEmpty($outfile)) {
+                if ($outFile.StartsWith(":")) {
+                    $outFile = $outFile.Substring(1, $outFile.Length - 1).Trim() #remove first :
+                }
+            }
+            else {
+                $outFile = $SessionFile
+            }
             #Save memory
-            $summary = Save_Summary -Path $transcriptPath2
-            Write-Host $summary -ForegroundColor Green
-            break }
+            $summary = Save_Summary -Path $transcriptPath2 -SessionFile $outFile -IsCLI $IsCLI
+            if ($IsCLI -eq $true) {
+                return $summary
+            }
+            $myprompt = $null
+            break 
+        }
 
-        { $mycommand -like "recall*"} { 
+        { $mycommand -like "recall*" } { 
             #restore memory
-            $myprompt = Recall_Conversation_History -SessionFile $SessionFile 
-            break }
+            $inFile = ($mycommand -replace "recall", "").Trim()
+            if ($false -eq [string]::isNullOrEmpty($outfile)) {
+                if ($inFile.StartsWith(":")) {
+                    $inFile = $inFile.Substring(1, $inFile.Length - 1).Trim() #remove first :
+                }
+            }
+            else {
+                $inFile = $SessionFile
+            }
+            $myprompt = Recall_Conversation_History -SessionFile $inFile -IsCLI $IsCLI
+            break 
+        }
 
         { $mycommand -like "url:*" } {
             #Experimental for now
-            $url = $mycommand -replace "url:", ""
+            $url = ($mycommand -replace "url:", "").Trim()
             try {
                 $response = Invoke-WebRequest -Uri $url
                 if ($null -ne $response -and $null -ne $response.Content) {
@@ -461,8 +523,11 @@ function Invoke-PaullyGPTCommand {
                         Write-Host "The file size is larger than limit: $global:fileSizeLimit kb."
                     }
                     else {
-                        if($null -ne $urlContents -and $urlContents.Length -gt 0) {
-                            $analysis = LearnFromSourceGPT -Source $url -Contents $urlContents -analyzeContents $true
+                        if ($null -ne $urlContents -and $urlContents.Length -gt 0) {
+                            $analysis = LearnFromSourceGPT -Source $url -Contents $urlContents -analyzeContents $true -IsCLI $IsCLI
+                            if ($IsCLI -eq $true) {
+                                return $analysis
+                            }
                             SpeakAsync $analysis
                         }
                     }
@@ -488,9 +553,14 @@ function Invoke-PaullyGPTCommand {
                             Write-Host "Cannot load binary files." -ForegroundColor Red
                         }
                         else {
-                            Write-Host "Loading File...$param" -ForegroundColor Green
+                            if ($IsCLI -eq $false) {
+                                Write-Host "Loading File...$param" -ForegroundColor Green
+                            }
                             $fileContents = (Get-Content $param) | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
-                            $analysis = LearnFromSourceGPT -Source $param -Contents $fileContents -analyzeContents $true
+                            $analysis = LearnFromSourceGPT -Source $param -Contents $fileContents -analyzeContents $true -IsCLI $IsCLI
+                            if ($IsCLI -eq $true) {
+                                return $analysis
+                            }
                             SpeakAsync $analysis
                         }
                     } 
@@ -502,30 +572,37 @@ function Invoke-PaullyGPTCommand {
             }
             break
         }
+        
         { $mycommand -like "clear*" -or $mycommand -like "reset*" } {
-            if($mycommand -like "clear*") {
+            if ($mycommand -like "clear*") {
                 $directive = ($mycommand -replace "clear", "").Trim()
             }
-            if($mycommand -like "reset*") {
+            if ($mycommand -like "reset*") {
                 $directive = ($mycommand -replace "reset", "").Trim()
             }
             $confirmation = "Y"
-            if ($false -eq [string]::IsNullOrEmpty($directive)) {
-                if($IsCLI -eq $false) {
+            if ($false -eq [string]::IsNullOrEmpty($directive)) { 
+                if ($IsCLI -eq $false) {
                     $confirmation = Read-Host "Are you sure you want to clear history and reset directives? (Y/N)"
                 }
                 if ($confirmation -eq "Y") {
-                    $global:ChatHistory = @(@{ role = "system"; content = $directive;})
+                    $global:ChatHistory = @(@{ role = "system"; content = $directive; })
+                    if ($IsCLI -eq $true) {
+                        return ("Reset to: `n$directive")
+                    }
                     Write-Host "Reset to: `n$directive" -ForegroundColor Green
                 }
             }
             else {
-                if($IsCLI -eq $false) {
+                if ($IsCLI -eq $false) {
                     $confirmation = Read-Host "Are you sure you want to clear history? (Y/N)"
                 }
                 if ($confirmation -eq "Y") {
                     if ($global:ChatHistory.Length -gt 0) {
-                        $global:ChatHistory = @(@{ role = "system"; content = $Directives;})
+                        $global:ChatHistory = @(@{ role = "system"; content = $Directives; })
+                        if ($IsCLI -eq $true) {
+                            return "Cleared!"
+                        }
                         Write-Host "Cleared!" -ForegroundColor Green
                     }
                 }
@@ -547,7 +624,9 @@ function LearnFromSourceGPT {
     Param(
         [string]$Source, 
         [string]$Contents,
-        [bool]$AnalyzeContents = $true)
+        [bool]$AnalyzeContents = $true,
+        [bool]$IsCLI = $false
+    )
 
     if ($true -eq [string]::isNullOrEmpty($Source)) {
         throw "Source is required."
@@ -571,16 +650,18 @@ function LearnFromSourceGPT {
     #     content = 
     # }
 
-    $startTime = Get-Date
-    Write-Host "Analyzing..." -ForegroundColor Green
-    $lastCount = $global:ChatHistory.Count
+    if ($IsCLI -eq $false) {
+        $startTime = Get-Date
+        Write-Host "Analyzing..." -ForegroundColor Green
+        $lastCount = $global:ChatHistory.Count
+    }
     $analysis = Get-GPT "Give me a compact detailed analysis of snippet '$hash' from source '$Source' which contains : ``````$encoded_contents``````"
-    if($global:ChatHistory.Count -gt 0) {
+    if ($global:ChatHistory.Count -gt 0) {
         $filteredArray = $global:ChatHistory | Where-Object { $_.role -ne "user" -and !$_.content.StartsWith($hash) }
         $global:ChatHistory = $filteredArray
     }
 
-    if($null -ne $analysis) {
+    if ($null -ne $analysis -and $IsCLI -eq $false) {
         $finishTime = Get-Date
         $totalSeconds = [Math]::Round(($finishTime).Subtract($startTime).TotalSeconds, 1)
         Write-Host " $totalSeconds seconds." -ForegroundColor Cyan                                                               #OPENAI MAGIC returned into variable => $answer to reuse
