@@ -12,11 +12,11 @@ $enterMode = $true
 $lastKeyTime = Get-Date
 function Read-TextWithEscape {
     param (
-        [string]$prompt
+        [string]$Prompt
     )
 
-    Write-Host $prompt -ForegroundColor Red -NoNewline
-    $inputText = ""
+    Write-Host $Prompt -ForegroundColor Red -NoNewline
+    $InputText = ""
     while ($true) {
         $key = [System.Console]::ReadKey($true)
         $char = $key.KeyChar
@@ -33,12 +33,12 @@ function Read-TextWithEscape {
                 $confirmation = Read-Host "Do you want to exit? (Y/N)"
                 if ($confirmation -like "[yY]*") { 
                     return $null }
-                else { Write-Host $prompt -ForegroundColor Red -NoNewline }
+                else { Write-Host $Prompt -ForegroundColor Red -NoNewline }
             }
 
             "Backspace" {
-                if ($inputText.Length -gt 0) {
-                    $inputText = $inputText.Substring(0, $inputText.Length - 1)
+                if ($InputText.Length -gt 0) {
+                    $InputText = $InputText.Substring(0, $InputText.Length - 1)
                     Write-Host -NoNewline "`b `b"
                 }
             }
@@ -52,7 +52,7 @@ function Read-TextWithEscape {
                 # Write-Host "enterMode = $enterMode" -ForegroundColor Yellow
                 if ($null -ne $pastedText ) {
                     Write-Host -NoNewline $pastedText
-                    $inputText += $pastedText
+                    $InputText += $pastedText
                 } 
                 Start-Sleep -Milliseconds 100
                 break
@@ -63,9 +63,9 @@ function Read-TextWithEscape {
                     $dateTime = Get-Date
                     $timestamp = $dateTime.ToString()
                     Write-Host "`n$timestamp ..." -NoNewLine -ForegroundColor Cyan; 
-                    return $inputText 
+                    return $InputText 
                 } else {
-                    $inputText += "`n"
+                    $InputText += "`n"
                     #Write-Host "`n" -NoNewLine -ForegroundColor Cyan; 
                 }
             }
@@ -76,13 +76,13 @@ function Read-TextWithEscape {
             }
 
             default {
-                $inputText += $char
+                $InputText += $char
                 Write-Host -NoNewline $char
             }
         }
     }
 
-    return $inputText
+    return $InputText
 }
 
 function Get-ParentProcessInfo {
@@ -127,37 +127,37 @@ function Get-CurrentAgent {
 
 function ReadJsonFromFile {
     param (
-        [string]$filePath
+        [string]$FilePath
     )
-    $json = Get-Content -Path $filePath | ConvertFrom-Json
+    $json = Get-Content -Path $FilePath | ConvertFrom-Json
     return $json
 }
 
 function ReadFromFile {
     param (
-        [string]$filePath
+        [string]$FilePath
     )
-    $content = Get-Content -Path $filePath
+    $content = Get-Content -Path $FilePath
     return $content
 }
 
 function ReadFromWeb {
     param (
-        [string]$url
+        [string]$Url
     )
-    $response = Invoke-WebRequest -Uri $url
+    $response = Invoke-WebRequest -Uri $Url
     return $response.Content
 }
 
 function Read-FromInputBox {
     param(
-        [string]$inputText,
-        [string]$prompt
+        [string]$InputText,
+        [string]$Prompt
     )
 
     # Create the form
     $form = New-Object System.Windows.Forms.Form
-    $form.Text = $prompt
+    $form.Text = $Prompt
     $form.MaximizeBox = $false  # Prevent maximizing the form
     $form.MinimizeBox = $false  # Prevent minimizing the form
     $form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedSingle
@@ -169,7 +169,7 @@ function Read-FromInputBox {
     $textBox.Multiline = $true
     $textBox.ScrollBars = "Vertical"
     $textBox.Dock = [System.Windows.Forms.DockStyle]::Fill
-    $textBox.Text = $inputText
+    $textBox.Text = $InputText
 
     # Create the OK button
     $okButton = New-Object System.Windows.Forms.Button

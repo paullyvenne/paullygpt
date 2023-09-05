@@ -6,38 +6,38 @@ Add-Type -Path (Join-path $module Terminal.Gui.dll)
 
 function CreateLabel {
     param(
-        [String]$text = "Label"
+        [String]$Text = "Label"
     )
     $control = [Terminal.Gui.Label]::new()
-    $control.Text = $text
+    $control.Text = $Text
     return $control
 }
 
 function CreateButton{
         param(
-            [String]$text = "Enter"
+            [String]$Text = "Enter"
         )
     $control = [Terminal.Gui.Button]::new()
-    $control.Text = $text
+    $control.Text = $Text
     return control
 }
 
 function CreateFrameView {
     param(
-        [String]$title = "Frame View"
+        [String]$Title = "Frame View"
     )
 
     $frameView = [Terminal.Gui.FrameView]::new()
     $frameView.Width = [Terminal.Gui.Dim]::Fill()
     $frameView.Height = [Terminal.Gui.Dim]::Fill()
-    $frameView.Title = $title
+    $frameView.Title = $Title
 
     return $frameView
 }
 
 function CreateTopMenuBar {
     param(
-        [String[]]$items = @()
+        [String[]]$Items = @()
     )
 
     $topMenuBar = [System.ConsoleColor]::DarkGray
@@ -45,7 +45,7 @@ function CreateTopMenuBar {
     [System.Console]::Clear()
 
     $topMenuItems = @()
-    foreach ($item in $items) {
+    foreach ($item in $Items) {
         $topMenuItems += $item
     }
 
@@ -61,19 +61,19 @@ function CreateTopMenuBar {
 
 function CreateScrollView {
     param(
-        [int]$width,
-        [int]$height,
-        [string]$content
+        [int]$Width,
+        [int]$Height,
+        [string]$Content
     )
 
     $scrollView = [Terminal.Gui.ScrollView]::new()
-    $scrollView.Width = $width
-    $scrollView.Height = $height
+    $scrollView.Width = $Width
+    $scrollView.Height = $Height
 
     $textView = [Terminal.Gui.TextView]::new()
-    $textView.Width = $width - 2
-    $textView.Height = $height - 2
-    $textView.Text = $content
+    $textView.Width = $Width - 2
+    $textView.Height = $Height - 2
+    $textView.Text = $Content
 
     $scrollView.ContentView = $textView
 
@@ -93,16 +93,16 @@ function CreateScrollView {
 
 # function ShowMessageBox {
 #     param(
-#         [String]$title,
+#         [String]$Title,
 #         [String]$message
 #     )
 
-#     $messageBoxWidth = [Math]::Max($title.Length, $message.Length) + 6
+#     $messageBoxWidth = [Math]::Max($Title.Length, $message.Length) + 6
 #     $messageBoxHeight = 7
 #     $messageBoxX = [Math]::Ceiling(([Terminal.Gui.Application]::TerminalSize.Width - $messageBoxWidth) / 2)
 #     $messageBoxY = [Math]::Ceiling(([Terminal.Gui.Application]::TerminalSize.Height - $messageBoxHeight) / 2)
 
-#     $window = [Terminal.Gui.Window]::new($title)
+#     $window = [Terminal.Gui.Window]::new($Title)
 #     $window.X = $messageBoxX
 #     $window.Y = $messageBoxY
 #     $window.Width = $messageBoxWidth
@@ -128,7 +128,7 @@ function CreateScrollView {
 
 function CreateWindow {
     param(
-            [string]$title,
+            [string]$Title,
             [ConsoleColor]$foregroundcolor = [ConsoleColor]::White,
             [ConsoleColor]$backgroundcolor = [ConsoleColor]::DarkBlue
         )
@@ -138,7 +138,7 @@ function CreateWindow {
         $backgroundColor = [ConsoleColor]::DarkBlue
         
         $Window = [Terminal.Gui.Window]::new()
-        $Window.Title = $title
+        $Window.Title = $Title
         $Window.ColorScheme.Normal = [Terminal.Gui.Attribute]::new($foregroundColor, $backgroundColor)
         return $Window
     } catch  {

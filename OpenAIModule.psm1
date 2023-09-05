@@ -276,27 +276,27 @@ function Get-OpenAICompletion {
 }
 function Reset-GPT {
     param(
-        [string]$directive
+        [string]$Directive
     )
     $global:ChatHistory = @()
-    $global:ChatHistory += @{ role = "system"; content = $directive }
+    $global:ChatHistory += @{ role = "system"; content = $Directive }
 }
 function Get-GPT {
     param(
-        [string]$prompt,
+        [string]$Prompt,
         [bool]$SavePrompt = $true,
         [bool]$SaveResponse = $true
     )
-    $completion = Get-OpenAICompletion -Prompt $prompt -SavePrompt $SavePrompt -SaveResponse $SaveResponse
+    $completion = Get-OpenAICompletion -Prompt $Prompt -SavePrompt $SavePrompt -SaveResponse $SaveResponse
     return $completion
 }
 function Get-GPTQuiet {
     param(
-        [string]$prompt,
+        [string]$Prompt,
         [bool]$SavePrompt = $true,
         [bool]$SaveResponse = $false
     )
-    $completion = Get-OpenAICompletion -Prompt $prompt -SavePrompt $SavePrompt -SaveResponse $SaveResponse
+    $completion = Get-OpenAICompletion -Prompt $Prompt -SavePrompt $SavePrompt -SaveResponse $SaveResponse
     return $completion
 }
 

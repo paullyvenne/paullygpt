@@ -20,32 +20,32 @@ function Init_Azure {
 
 function Write-Storage {
     param (
-        [string]$tableName = "Conversations",
-        [string]$object
+        [string]$TableName = "Conversations",
+        [string]$Object
     )
 
     Init_Azure
 
-    if($null -eq $azContext -or $null -eq $tableName -or $null -eq $object) {
+    if($null -eq $azContext -or $null -eq $TableName -or $null -eq $Object) {
         Write-Host "Write-Storge invalid arguements." -ForegroundColor Red
         return
     }
 
-    $storageAccountName = "vennesolutions"
-    $storageAccountKey = "cDOXI499ry7vOlQrnks4WRNqt81IfGeClpFO+GGgnhvnj6rS6OWJ0ekzUYEc8nKIo93QF6hp5cCu+AStHgo2zg=="
+    $storageAccountName = ""
+    $storageAccountKey = ""
     $azContext = New-AzStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $storageAccountKey
 
     # Create a storage table
-    New-AzStorageTable -Name $tableName
+    New-AzStorageTable -Name $TableName
     
     # Create an entity for the conversation entry
     $currentDate = Get-Date
     $entity = New-AzStorageTableEntity -Property @{
         PartitionKey = $currentDate.ToString("yyyy-MM-dd")
         RowKey       = [Guid]::NewGuid().ToString()
-        Message      = $object | ConvertTo-Json
+        Message      = $Object | ConvertTo-Json
     }
 
     # Save the entity to the storage table
-    Set-AzStorageTableEntity -TableName $tableName -Entity $entity
+    Set-AzStorageTableEntity -TableName $TableName -Entity $entity
 }

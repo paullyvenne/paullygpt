@@ -37,13 +37,13 @@ function SetDefaultVoice {
 }
 
 function SpeakAsync {
-    param([string]$text)
+    param([string]$Text)
 
     if (-not $global:speechEnabled) {
         return
     }
 
-    $filteredText = $text -replace '[^\p{L}\p{N}\p{P}\p{Z}]', ''
+    $filteredText = $Text -replace '[^\p{L}\p{N}\p{P}\p{Z}]', ''
 
     $global:speechSynthesizer = New-Object -TypeName System.Speech.Synthesis.SpeechSynthesizer
     $global:speechSynthesizer.Rate = 2

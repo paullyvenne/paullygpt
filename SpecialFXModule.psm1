@@ -88,7 +88,7 @@ function GetStarPatternProbabilities {
         [string]$starPattern
     )
 
-    $probabilities = @{}
+    $Probabilities = @{}
 
     # Remove newlines from the star pattern
     $starPattern = $starPattern -replace "`r`n", ""
@@ -98,44 +98,44 @@ function GetStarPatternProbabilities {
 
     # Count the occurrences of each character in the star pattern
     foreach ($character in $starPattern) {
-        if ($character -notin $probabilities.Keys) {
-            $probabilities[$character] = 0
+        if ($character -notin $Probabilities.Keys) {
+            $Probabilities[$character] = 0
         }
-        $probabilities[$character]++
+        $Probabilities[$character]++
     }
 
     # Calculate the probabilities for each character
-    foreach ($key in $probabilities.Keys) {
-        $probabilities[$key] = [Math]::Round($probabilities[$key] / $totalCharacters, 2)
+    foreach ($key in $Probabilities.Keys) {
+        $Probabilities[$key] = [Math]::Round($Probabilities[$key] / $totalCharacters, 2)
     }
 
-    return $probabilities
+    return $Probabilities
 }
 
 function GenerateStarPattern {
     param (
-        [int]$width,
-        [int]$height,
-        [hashtable]$probabilities,
-        [int]$randomSeed = (Get-Date).Millisecond
+        [int]$Width,
+        [int]$Height,
+        [hashtable]$Probabilities,
+        [int]$RandomSeed = (Get-Date).Millisecond
     )
 
-    $random = New-Object System.Random($randomSeed)
+    $random = New-Object System.Random($RandomSeed)
     $starPattern = ""
 
     # Create the new star pattern
-    for ($y = 1; $y -le $height; $y++) {
-        for ($x = 1; $x -le $width; $x++) {
+    for ($y = 1; $y -le $Height; $y++) {
+        for ($x = 1; $x -le $Width; $x++) {
             $randomValue = $random.NextDouble()
             $selectedCharacter = $null
 
             # Select the character based on the probabilities
-            foreach ($key in $probabilities.Keys) {
-                if ($randomValue -lt $probabilities[$key]) {
+            foreach ($key in $Probabilities.Keys) {
+                if ($randomValue -lt $Probabilities[$key]) {
                     $selectedCharacter = $key
                     break
                 }
-                $randomValue -= $probabilities[$key]
+                $randomValue -= $Probabilities[$key]
             }
 
             # If no character is selected, default to a whitespace
@@ -169,10 +169,10 @@ function starExample {
         .    *
     *    .   *    +"
 
-    $probabilities = GetStarPatternProbabilities -starPattern $starPattern
+    $Probabilities = GetStarPatternProbabilities -starPattern $starPattern
 
-    $width = 20
-    $height = 10
+    $Width = 20
+    $Height = 10
 
-    GenerateStarPattern -width $width -height $height -probabilities $probabilities
+    GenerateStarPattern -width $Width -height $Height -probabilities $Probabilities
 }
