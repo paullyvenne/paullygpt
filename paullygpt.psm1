@@ -171,7 +171,7 @@ function Invoke_PaullyGPT_V1 {
                 $SessionFile = ($FirstPrompt -replace "!recall:", "").Trim()
             }
             Recall_Conversation_History -SessionFile $SessionFile  -DefaultPrompt $FirstPrompt -IsCLI $IsCLI | Out-Null
-            $myprompt = Summarize_Conversation
+            $myprompt = $FirstPrompt
         } else {
             $myprompt = Recall_Conversation_History -SessionFile $SessionFile  -DefaultPrompt $FirstPrompt -IsCLI $IsCLI 
         }
@@ -202,7 +202,7 @@ function Invoke_PaullyGPT_V1 {
         if ($myprompt -like "!*" ) {
             $mycommand = [string]::new($myprompt).Substring(1, $myprompt.Length - 1).Trim()
             Write-Host "`n" -NoNewline
-            $myprompt = Invoke-PaullyGPTCommand -Command $mycommand -Directives $Directives -IsCLI $IsCLI
+            $myprompt = Invoke-PaullyGPTCommand -Command $mycommand -Directives $Directives -IsCLI $IsCLI -SaveLastSession $SaveLastSession 
         }
 
         #(!$myprompt.StartsWith("!")) -and 
@@ -361,20 +361,18 @@ function Save_Summary {
         [string]$SessionFile = "last.json",
         [bool]$IsCLI = $false
     )
-    if ($true -eq $SaveLastSession) {
-        $directory = ".\paullygpt\"
-        $fileName = Split-Path -Path $Path -Leaf
-        # $fullPath = $directory + $fileName.Replace(".log.txt", ".summary.txt")
-        # $lastPath = $directory + "last.summary.txt"
-        $lastPathJson = $directory + $SessionFile
-        # $summary = Summarize_Conversation
-        # $summary | Out-File -FilePath $fullPath -Encoding UTF8 -Force!me
-        # $summary | Out-File -FilePath $lastPath -Encoding UTF8 -Force
-        $global:ChatHistory | ConvertTo-Json | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
-        $summary = "Saved memories to $lastPathJson."
-        if($IsCLI -eq $false) {
-            Write-Host $summary -ForegroundColor Green
-        }
+    $directory = ".\paullygpt\"
+    $fileName = Split-Path -Path $Path -Leaf
+    # $fullPath = $directory + $fileName.Replace(".log.txt", ".summary.txt")
+    # $lastPath = $directory + "last.summary.txt"
+    $lastPathJson = $directory + $SessionFile
+    # $summary = Summarize_Conversation
+    # $summary | Out-File -FilePath $fullPath -Encoding UTF8 -Force!me
+    # $summary | Out-File -FilePath $lastPath -Encoding UTF8 -Force
+    $global:ChatHistory | ConvertTo-Json | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
+    $summary = "Saved memories to $lastPathJson."
+    if($IsCLI -eq $false) {
+        Write-Host $summary -ForegroundColor Green
     }
     return $summary
 }
@@ -386,7 +384,8 @@ function Invoke-PaullyGPTCommand {
     Param(
         [string]$Directives,
         [string]$Command,
-        [bool]$IsCLI = $false  
+        [bool]$IsCLI = $false, 
+        [bool]$SaveLastSession = $true  
     )
 
     $mycommand = $Command

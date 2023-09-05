@@ -73,7 +73,7 @@ function PlayIndyMelody {
 
 
 
-$firstPrompt = "With flair start the introduction about Indiana Jones, then list a the adventures to choose from."
+$firstPrompt = "With flair start the introduction about Indiana Jones, then show a numbered list of the adventures to choose from."
 #OPTIMIZED VERSION OF THE ABOVE - COMPACTED AND SUMMARIZED
 #------------------------------------------------------------------------------------------------------------#
 #
@@ -83,7 +83,7 @@ $firstPrompt = "With flair start the introduction about Indiana Jones, then list
 $directives = "Try to keep prompts under 1000 characters. First the users to choose an adventure first.
 Prepare a choice of 3 unique adventure titles, along with corresponding locations, lost artifacts, and sidekicks. The game should be a choose-your-own-adventure text game based on the Indiana Jones theme, inspired by the 1930s adventure serials.
 Start the game as Indiana Jones, daydreaming at your desk in Barnett College. Notice letters on your desk, each representing a different adventure option and each when chosen have a written letter that you will write in quotes containing some correspondence to Indy. Each sidekick should possess special skills and items that can affect the path and outcome of the game, they can also have some connection to the sidekicks in the movies.
-Once an adventure is chosen, always describe the current location and provide 5 choices for the player. These choices may include one that benefits from higher intelligence, strength, knowledge, agility, or speed. Additionally, include an option for looking around for clues that slowly lead to the right choice.
+Once an adventure is chosen, always describe the current location and provide 5 numbered choices for the player. These choices may include one that benefits from higher intelligence, strength, knowledge, agility, or speed. Additionally, include an option for looking around for clues that slowly lead to the right choice.
 Throughout the game, provide details about transportation, sights, sounds, and smells, as well as deep thoughts about fortune, glory, life, death, and love. Mention Indy's masculine strengths, voice, and quirks, as well as those of the sidekick, keeping them logically accurate based on the sidekick's background.
 Expect encounters with local wildlife, criminals, authorities, or even international organizations trying to hinder your progress and steal the artifact. Characters should match their backgrounds and cultures, speaking in their native languages. Maintain historical accuracy, cultural sensitivity, and realism, including pre-WW2 politics and dangerous regimes, also including limitations of technology and communication.
 The game should include a local guide or contact who will help Indy reach the artifact's location and provide necessary logistics. Along the way, Indy should acquire clues that bring him closer to the artifact, and perhaps even encounter a love interest who aids in the mission.
@@ -101,4 +101,4 @@ Indy also has luck points which he gains when he makes the right choices and los
 9) If Indy dies, give the option to go back in time to the last save point if they have enough remaining luck points."
 
 PlayIndyMelody
-Invoke_PaullyGPT_V1 -Directives $directives -FirstPrompt $firstPrompt -ResumeLastSession $false -SaveSession $false
+Invoke_PaullyGPT_V1 -Directives $directives -FirstPrompt $firstPrompt -ResumeLastSession $true -SaveSession $true -SessionFile "IndyGPT.json"
