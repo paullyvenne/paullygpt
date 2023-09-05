@@ -27,6 +27,7 @@ Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to en
 
 ## Updates - I know it says 1.* but it's BETA still as I explore how to best enhance
 
+* v1.0.15 - Added HollywoodMovieDirector.ps1 - Another example of prompt/directive engineering for an unlimited content experience. (I haven't played to end yet, will refine over time)
 * v1.0.14 - Introducing NEW PowerShell CLI Method - Yo_Paully [prompt], calls the PaullyGPT engine via command line instead of traditional conversation loop.
 * v1.0.13 - I'll skip this time. Maybe I'm supersitious! 
 * v1.0.12 - Bunch of OpenAI call related things automatic multi-page response handling, also if the message history gets too large, it will attempt three times by removing the message with largest content, enabled utf-8 encoding by default.  Added !remove \[index\] command to remove !history items by index.
