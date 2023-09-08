@@ -1,5 +1,6 @@
 # PaullyGPT
 A flavor of ChatGPT powered by PowerShell.
+[DOWNLOAD LATEST](https://codeload.github.com/paullyvenne/paullygpt/zip/refs/heads/main)
 
 ## Introduction
 
@@ -10,9 +11,6 @@ Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to en
 * IndyGPT.ps1 - An example of PaullyGPT module with text-adventure directives.
 * HollywoodMovieDirector.ps1 - Another example of PaullyGPT module with text-adventure directives.
 * or type Import-Module .\PaullyGPT.psm1 to make Yo_Paully available in the PowerShell terminal.
-  
-# Download PaullyGPT 
-[DOWNLOAD LATEST](https://codeload.github.com/paullyvenne/paullygpt/zip/refs/heads/main)
 
 ## PaullyGPT Features
 * A lightning-fast and user-friendly ChatGPT experience in the convenience of a PowerShell or VSCODE Terminal with PS extensions.
