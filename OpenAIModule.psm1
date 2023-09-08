@@ -1,9 +1,77 @@
 $global:MaxTokens = 500
 $global:Temperature = 0.8
 $global:MaxCompletionLoop = 5
-$global:MaxExceptionLoop = 5
+$global:MaxExceptionLoop = 20
 
 $lastContent = ""
+
+function Optimize_MessageTokens {
+    param (
+        [object[]]$Messages,
+        [long]$MaxTokenSize = 160384,
+        [long]$MaxCompletionTokenSize = 500
+    )
+
+    if($Messages.Length -gt 12) {
+        return @($Messages[0]) + @($Messages | Select-Object -Skip 10)
+    } else {
+        return @($Messages[0]) + @($Messages | Select-Object -Skip 2)
+    }
+    # $replyPrompts = $Messages.Clone() | Select-Object -Skip 1
+    # $count = Get_MessageTokenCount -Messages $replyPrompts
+    # if(!($count -gt ($MaxTokenSize - $MaxCompletionTokenSize))) {
+    #     return $Messages }
+    # else {
+    #     while($count -gt ($MaxTokenSize - $MaxCompletionTokenSize)) {
+    #         $replyPrompts = $Messages | Select-Object -Skip 1
+    #         $count = Get_MessageTokenCount -Messages $replyPrompts
+    #     }
+    #     $optimizedMessages = @($Messages[0]) + $replyPrompts
+    #     return $optimizedMessages
+    # }
+}
+
+function Trim_MessageTokens {
+    param (
+        [object[]]$Messages,
+        [long]$MaxTokenSize = 16384,
+        [long]$MaxCompletionTokenSize = 500
+    )
+        $replyPrompts = $Messages.Clone() | Select-Object -Skip 1
+        $count = Get_MessageTokenCount -Messages $replyPrompts
+        $replyPrompts = $replyPrompts | Select-Object -Skip $MaxCompletionTokenSize
+        $optimizedMessages = @($Messages[0]) + $replyPrompts
+        return $optimizedMessages
+}
+
+function Get_MessageTokenCount{
+    Param(
+        [object[]]$Messages
+    )
+    $tokenCount = $Messages | ForEach-Object { ($_.Content -split '[^a-zA-Z0-9]+').Count } | Measure-Object -Sum | Select-Object -ExpandProperty Sum
+    return $tokenCount
+}
+function Append_Message {
+    param (
+        [string]$Prompt,
+        [string]$Role = "user"
+    )
+    try {
+        if(!([string]::IsNullOrEmpty($Prompt))) {
+            $Prompt = $Prompt.Trim()
+
+            $newMessage = @{
+                role    = "user"
+                content = [System.Text.Encoding]::UTF8.GetString([System.Text.Encoding]::UTF8.GetBytes($Prompt))
+            }
+            $global:ChatHistory = @($global:ChatHistory) + @($newMessage) 
+        }
+    } catch {
+        Write-Host "An error occurred: $($_.Exception.ToString())" -ForegroundColor Red
+    }
+    return $null
+}
+
 function Send-OpenAICompletion {
     param (
         [string]$Prompt,
@@ -19,19 +87,25 @@ function Send-OpenAICompletion {
     $output = ""
 
     if($SavePrompt -eq $true) {
-        $Prompt = $Prompt.Trim()
-        $newMessage = @{
-            role    = "user"
-            content = [System.Text.Encoding]::UTF8.GetString([System.Text.Encoding]::UTF8.GetBytes($Prompt))
-        }
-        $global:ChatHistory += $newMessage 
+        Append_Message -Role "user" -Prompt $Prompt
     }
+
+    $existingTokens = Get_MessageTokenCount -Messages $global:ChatHistory
+    $global:ChatHistory = Optimize_MessageTokens -Messages $global:ChatHistory -MaxCompletionTokenSize $MaxTokens 
+
+    # #Clean up ChatHistory from oldest if it exceeds MaxTokens
+    # $currentCount = Get_MessageTokenCount
+    # while($currentCount -gt 8000 -and $global:ChatHistory.Length -gt 1){
+    #     $global:ChatHistory.RemoveAt(1)
+    #     $currentCount = GetMessageTokenCount
+    #     #Should also request a summary soon message to be added to the chat history
+    # }
 
     $body = @{
         model       = $global:Model
         messages    = $global:ChatHistory
         temperature = $Temperature
-        max_tokens  = $MaxTokens
+        max_tokens  = $maxCompletionTokens
         n           = 1
         stop        = $null
     } | ConvertTo-Json -Depth 5 -Compress
@@ -62,22 +136,13 @@ function Send-OpenAICompletion {
                 $reason = $response.choices[0].finish_reason
 
                 if($SaveResponse -eq $true) {
-                    $newResponse = @{
-                        role    = "assistant"
-                        content = $content
-                    }
-                    $global:ChatHistory += $newResponse 
+                    Append_Message -Role "assistant" -Prompt $content
                 }
                 
                 $output += $content
                 if(($MaxCompletionLoop -gt 0) -and ($reason -eq "length")) {
-                    $added = ""
-                    if($lastContent.length -gt 0) {
-                        $added = $content.Replace($lastContent, "")
-                    } else {
-                        $added = $content
-                    }
-                    Write-Host "." -ForegroundColor Yellow -NoNewline
+                    #$added = $content.Replace($lastContent, "")
+                    #Write-Host "." -ForegroundColor Yellow -NoNewline
                     #Write-Host "$reason : $added`nStill thinking..." -ForegroundColor Yellow
                     $output += Send-OpenAICompletion -Prompt "continue" -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $APIKey -SavePrompt $false -SaveReponse $true -MaxCompletionLoop ($MaxCompletionLoop-1) -MaxExceptionLoop $MaxExceptionLoop                   
                 }
@@ -88,28 +153,37 @@ function Send-OpenAICompletion {
             throw [System.Exception]::new("An unexpected error occurred. The response was null.")
         }
     }
-    catch [System.Net.WebException] {
-        Write-Host "An error occurred: $($_.Exception.ToString())" -ForegroundColor Red
-        $httpResponse = $_.Exception.Response
-        if ($httpResponse -and $httpResponse.StatusCode -eq "BadRequest") {
-            $largestMessageIndex = $global:ChatHistory.Keys | Sort-Object { $global:ChatHistory[$_] } -Descending | Select-Object -First 1
-            if (($MaxExceptionLoop -gt 0) -and ($null -ne $largestMessageIndex)) {
-                Write-Host "." -NoNewline -ForegroundColor Red
-                $clone = $global:ChatHistory.Clone()
-                $clone.Remove($largestMessageIndex)
-                $global:ChatHistory = $clone
-                $output = Send-OpenAICompletion -Prompt "" -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $APIKey -SavePrompt $SavePrompt -SaveReponse $saveResponse -MaxCompletionLoop $MaxCompletionLoop -MaxExceptionLoop ($MaxExceptionLoop-1)                       
+    # catch [System.Net.WebException] {
+    #     Write-Host "An error occurred: $($_.Exception.ToString())" -ForegroundColor Red
+    #     $httpResponse = $_.Exception.Response
+    #     if ($httpResponse -and $httpResponse.StatusCode -eq "BadRequest") {
+    #         if ($MaxExceptionLoop -gt 0) {
+    #             Write-Host "." -NoNewline -ForegroundColor Red
+    #             $global:ChatHistory = Optimize_MessageTokens -Messages $global:ChatHistory -MaxCompletionTokenSize $MaxTokens 
+    #             $output = Send-OpenAICompletion -Prompt "" -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $APIKey -SavePrompt $SavePrompt -SaveReponse $saveResponse -MaxCompletionLoop $MaxCompletionLoop -MaxExceptionLoop ($MaxExceptionLoop-1)                       
+    #         }
+    #     }
+    #     throw [System.Exception]::new("An unexpected error occurred: $_")
+    # }
+    catch {
+        if($null -ne $_.ErrorDetails) {
+            if(($_.ErrorDetails | ConvertFrom-Json).error.message -like "*maximum context length*") {
+                if ($MaxExceptionLoop -gt 0) {
+                    Write-Host "." -NoNewline -ForegroundColor Red
+                    $global:ChatHistory = Optimize_MessageTokens -Messages $global:ChatHistory -MaxCompletionTokenSize $MaxTokens 
+                    Start-Sleep -Milliseconds 500
+                    return Send-OpenAICompletion -Prompt "" -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $APIKey -SavePrompt $SavePrompt -SaveReponse $saveResponse -MaxCompletionLoop $MaxCompletionLoop -MaxExceptionLoop ($MaxExceptionLoop-1)                       
+                }
             }
         }
-        throw [System.Exception]::new("An unexpected error occurred: $_")
-    }
-    catch {
         if($true -eq $global:DEBUG) {
             Write-Host "An error occurred: $_" -ForegroundColor Red
             Write-Host ($param) -ForegroundColor Yellow
-        } else {
-            Write-Host "An error occurred: $($_.Exception.ToString())" -ForegroundColor Red
+            if($null -ne $_.ErrorDetails.Message) {
+                Write-Host ($_.ErrorDetails.Message | ConvertFrom-Json).error.message -ForegroundColor Red
+            }
         }
+        Write-Host "An error occurred: $($_.Exception.ToString())" -ForegroundColor Red
     }
     return $null
 }
@@ -127,7 +201,7 @@ function Send-OpenAICompletion {
 #         content = $Prompt
 #     }
 
-#     $global:ChatHistory += $newMessage 
+#     $global:ChatHistory +#= $newMessage 
 #     $body = @{
 #         model       = $global:Model
 #         messages    = $global:ChatHistory
@@ -182,10 +256,6 @@ function Send-OpenAICompletion {
 #         [switch]$Paginate
 #     )
 
-#     $global:ChatHistory += @{
-#         role    = "user"
-#         content = $Prompt
-#     }
 #     $body = @{
 #         model       = $global:Model
 #         messages    = $global:ChatHistory
@@ -279,7 +349,7 @@ function Reset-GPT {
         [string]$Directive
     )
     $global:ChatHistory = @()
-    $global:ChatHistory += @{ role = "system"; content = $Directive }
+    Append_Message -Role "system" -Prompt $Directive
 }
 function Get-GPT {
     param(
@@ -287,7 +357,7 @@ function Get-GPT {
         [bool]$SavePrompt = $true,
         [bool]$SaveResponse = $true
     )
-    $completion = Get-OpenAICompletion -Prompt $Prompt -SavePrompt $SavePrompt -SaveResponse $SaveResponse
+    $completion = Get-OpenAICompletion -Prompt $Prompt -SavePrompt $SavePrompt -SaveResponse $SaveResponse -MaxTokens $global:MaxTokens
     return $completion
 }
 function Get-GPTQuiet {
@@ -296,17 +366,17 @@ function Get-GPTQuiet {
         [bool]$SavePrompt = $true,
         [bool]$SaveResponse = $false
     )
-    $completion = Get-OpenAICompletion -Prompt $Prompt -SavePrompt $SavePrompt -SaveResponse $SaveResponse
+    $completion = Get-OpenAICompletion -Prompt $Prompt -SavePrompt $SavePrompt -SaveResponse $SaveResponse -MaxTokens $global:MaxTokens
     return $completion
 }
 
-function Get-GPTandForget {
+function Get-GPTAndForget {
     param(
         [string]$prompt,
         [bool]$SavePrompt = $false,
         [bool]$SaveResponse = $false
     )
-    $completion = Get-OpenAICompletion -Prompt $prompt -SavePrompt $SavePrompt -SaveResponse $SaveResponse
+    $completion = Get-OpenAICompletion -Prompt $prompt -SavePrompt $SavePrompt -SaveResponse $SaveResponse -MaxTokens $global:MaxTokens
     return $completion
 }
 function Get-ValidAPIKey {
