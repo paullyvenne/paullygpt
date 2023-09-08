@@ -5,12 +5,14 @@ A flavor of ChatGPT powered by PowerShell.
 
 Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to enhance your research and interactive experiences. Powered by PowerShell, PaullyGPT seamlessly integrates with ChatGPT to provide you with a captivating conversational interface. Engage in insightful discussions, explore diverse perspectives, and unlock the vast depths of knowledge effortlessly. With PaullyGPT, you not only have access to text-based interactions but also the remarkable feature of text-to-speech functionality. Let PaullyGPT be your trusted companion on your journey of discovery, guiding you towards new horizons of knowledge and understanding. Elevate your research and interactive endeavors with the harmonious synergy of PaullyGPT and ChatGPT.
 
-# Main Scripts
+# Main Powershell Scripts
 * Paullygpt.ps1 - Primary script to run PaullyGPT in Minimalistic Mode
 * IndyGPT.ps1 - An example of PaullyGPT module with text-adventure directives.
 * HollywoodMovieDirector.ps1 - Another example of PaullyGPT module with text-adventure directives.
 * or type Import-Module .\PaullyGPT.psm1 to make Yo_Paully available in the PowerShell terminal.
   
+# Download PaullyGPT 
+[DOWNLOAD LATEST](https://codeload.github.com/paullyvenne/paullygpt/zip/refs/heads/main)
 
 ## PaullyGPT Features
 * A lightning-fast and user-friendly ChatGPT experience in the convenience of a PowerShell or VSCODE Terminal with PS extensions.
@@ -150,7 +152,7 @@ Requires an openAi API subscription key, that will be saved when first loaded in
 ![IndyGPT AI powered text-based adventure game](images/indygpt1.png)
 
 ## More Information / Troubleshooting
-https://github.com/paullyvenne/paullygpt
+[https://github.com/paullyvenne/paullygpt]
 
 
 ### Powershell scripts don't seem to run without windows security poping up
