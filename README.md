@@ -1,5 +1,6 @@
 # PaullyGPT
 A flavor of ChatGPT powered by PowerShell.
+
 [DOWNLOAD LATEST](https://codeload.github.com/paullyvenne/paullygpt/zip/refs/heads/main)
 
 ## Introduction
