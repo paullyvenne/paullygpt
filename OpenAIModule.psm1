@@ -8,11 +8,12 @@ $lastContent = ""
 function Optimize_MessageTokens {
     param (
         [object[]]$Messages,
-        [long]$MaxTokenSize = 160384,
+        [long]$MaxTokenSize = 16384,
         [long]$MaxCompletionTokenSize = 500
     )
 
-    if($Messages.Length -gt 12) {
+    $neededBuffer = $MaxTokenSize-$MaxCompletionTokenSize
+    if($Messages.Length -gt 12 -and $Message.Length -gt $neededBuffer) {
         return @($Messages[0]) + @($Messages | Select-Object -Skip 10)
     } else {
         return @($Messages[0]) + @($Messages | Select-Object -Skip 2)
@@ -61,10 +62,13 @@ function Append_Message {
             $Prompt = $Prompt.Trim()
 
             $newMessage = @{
-                role    = "user"
+                role    = $Role
                 content = [System.Text.Encoding]::UTF8.GetString([System.Text.Encoding]::UTF8.GetBytes($Prompt))
             }
-            $global:ChatHistory = @($global:ChatHistory) + @($newMessage) 
+            if($global:ChatHistory.Count -eq 0) {
+                $global:ChatHistory = @()
+            }
+            $global:ChatHistory += @($newMessage) 
         }
     } catch {
         Write-Host "An error occurred: $($_.Exception.ToString())" -ForegroundColor Red
@@ -89,9 +93,6 @@ function Send-OpenAICompletion {
     if($SavePrompt -eq $true) {
         Append_Message -Role "user" -Prompt $Prompt
     }
-
-    $existingTokens = Get_MessageTokenCount -Messages $global:ChatHistory
-    $global:ChatHistory = Optimize_MessageTokens -Messages $global:ChatHistory -MaxCompletionTokenSize $MaxTokens 
 
     # #Clean up ChatHistory from oldest if it exceeds MaxTokens
     # $currentCount = Get_MessageTokenCount
@@ -321,7 +322,7 @@ function Get-OpenAICompletion {
         [bool]$SaveResponse = $true
     )
 
-    $configFilePath = ".\paullygpt\paullygpt.config.json"
+    $configFilePath =  $global:DefaultDataFolder + "paullygpt.config.json"
     $config = Read-Config -ConfigFilePath $configFilePath
 
     $apiKey = Get-ValidAPIKey -APIKey $config.APIKey

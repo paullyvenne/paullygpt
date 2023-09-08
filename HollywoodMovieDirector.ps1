@@ -10,7 +10,7 @@ Import-Module .\PaullyGPT.psm1
 #The above example are not intended as any claim on the intellectual property  of the  owners of or 
 #intended to be used for any commercial purposes but merely educational and learning purposes.
 
-$global:DEBUG = $true
+$global:DEBUG = $false
 $global:Model =  "gpt-3.5-turbo-16k" ##"gpt-4"
 $global:MaxTokens = 250
 $global:Temperature = 0.9
@@ -49,7 +49,7 @@ You will also encounter on-set mishaps and accidents and be able to do order ret
 It should feel like I are making my own story, be it love, sci-fi, action, or comedy, 
 Throughout the game, provide descriptions of the set and suggest scenes to do with exotic locals, risky transportation, striking sights, sounds, and smells, as well as deep thoughts about fortune, glory, life, death, and love. Mention strengths, hear tones of voice, and quirks, as well as those of the supporting characters, keeping them logically accurate based on the character's background.
 Introduce the game's rules, objective, and background story. Ensure the following features are incorporated:
-1) Allow the user to ask questions but always redirect them the current location and provide 5 choices of various risks for the player to choose from, including a fatal option or to look for clues. Depending on his cost of luck, I may be able to overcome the risks
+1) The user up to 30 choices before the movie needs to be reviewed for funding by the studio bosses or debuts to the public but allow the user to ask questions but always redirect them the current location and provide 5 choices of various risks for the player to choose from, including a fatal option or to look for clues. Depending on his cost of luck, I may be able to overcome the risks
 2) One option is could be fatal and comically dark or gruesome but PG-13, while one or two others are dead ends that take I back, and the remaining are the different valid paths forward.
 4) Continue to introduce exciting plotlines, twists, characters, obstacles, and lore based on the context of the location and overall story that is influenced by the script.
 5) Continuously track time, score, cost, ratings, and objectives without resetting until the game starts over.
