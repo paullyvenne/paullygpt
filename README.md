@@ -34,11 +34,6 @@ Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to en
 * v1.0.13 - I'll skip this time. Maybe I'm supersitious! 
 * v1.0.12 - Bunch of OpenAI call related things automatic multi-page response handling, also if the message history gets too large, it will attempt three times by removing the message with largest content, enabled utf-8 encoding by default.  Added !remove \[index\] command to remove !history items by index.
 * v1.0.11 - Resume Conversation enabled
-## BONUS - INDYGPT and HollywoodMovieDirector - A choose your own procedurally generated text based adventures game - Unlimited Adventure and Customizable
-* INDYGPT.ps1 (alpha) is an engaging text-adventure encounter based on Indiana Jones as example of the power of OpenAI GPT directives and PaullyGPT Powershell module. Every adventure is completely generated on the fly and sprinkled with exciting dialog and descriptive details.
-* HollywoodMovieDirector.ps1 (alpha) is an exciting text simulation game being in a Hollywood Director's Chair with full control of the script to movie production but watch out for your budget when the studio bosses review your progress or you may not be able to afford another movie again!
-
-![IndyGPT AI powered text-based adventure game](images/indygpt1.png)
 
 ## Instructions
 1. Install Powershell 7.* [https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.3], older powershells may not be compatible with module loading.
@@ -148,7 +143,13 @@ Exit 1
 ! Note:
 Requires an openAi API subscription key, that will be saved when first loaded into a PaullyGPT.config.json file.
 
-## More Information
+## BONUS - INDYGPT and HollywoodMovieDirector - A choose your own procedurally generated text based adventures game - Unlimited Adventure and Customizable
+* INDYGPT.ps1 (alpha) is an engaging text-adventure encounter based on Indiana Jones as example of the power of OpenAI GPT directives and PaullyGPT Powershell module. Every adventure is completely generated on the fly and sprinkled with exciting dialog and descriptive details.
+* HollywoodMovieDirector.ps1 (alpha) is an exciting text simulation game being in a Hollywood Director's Chair with full control of the script to movie production but watch out for your budget when the studio bosses review your progress or you may not be able to afford another movie again!
+
+![IndyGPT AI powered text-based adventure game](images/indygpt1.png)
+
+## More Information / Troubleshooting
 https://github.com/paullyvenne/paullygpt
 
 
