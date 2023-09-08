@@ -94,6 +94,7 @@ function Send-OpenAICompletion {
         Append_Message -Role "user" -Prompt $Prompt
     }
 
+   
     # #Clean up ChatHistory from oldest if it exceeds MaxTokens
     # $currentCount = Get_MessageTokenCount
     # while($currentCount -gt 8000 -and $global:ChatHistory.Length -gt 1){
@@ -154,18 +155,18 @@ function Send-OpenAICompletion {
             throw [System.Exception]::new("An unexpected error occurred. The response was null.")
         }
     }
-    # catch [System.Net.WebException] {
-    #     Write-Host "An error occurred: $($_.Exception.ToString())" -ForegroundColor Red
-    #     $httpResponse = $_.Exception.Response
-    #     if ($httpResponse -and $httpResponse.StatusCode -eq "BadRequest") {
-    #         if ($MaxExceptionLoop -gt 0) {
-    #             Write-Host "." -NoNewline -ForegroundColor Red
-    #             $global:ChatHistory = Optimize_MessageTokens -Messages $global:ChatHistory -MaxCompletionTokenSize $MaxTokens 
-    #             $output = Send-OpenAICompletion -Prompt "" -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $APIKey -SavePrompt $SavePrompt -SaveReponse $saveResponse -MaxCompletionLoop $MaxCompletionLoop -MaxExceptionLoop ($MaxExceptionLoop-1)                       
-    #         }
-    #     }
-    #     throw [System.Exception]::new("An unexpected error occurred: $_")
-    # }
+    catch [System.Net.WebException] {
+        Write-Host "An error occurred: $($_.Exception.ToString())" -ForegroundColor Red
+        $httpResponse = $_.Exception.Response
+        if ($httpResponse -and $httpResponse.StatusCode -eq "BadRequest") {
+            if ($MaxExceptionLoop -gt 0) {
+                Write-Host "." -NoNewline -ForegroundColor Red
+                $global:ChatHistory = Optimize_MessageTokens -Messages $global:ChatHistory -MaxCompletionTokenSize $MaxTokens 
+                $output = Send-OpenAICompletion -Prompt "" -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $APIKey -SavePrompt $SavePrompt -SaveReponse $saveResponse -MaxCompletionLoop $MaxCompletionLoop -MaxExceptionLoop ($MaxExceptionLoop-1)                       
+            }
+        }
+        throw [System.Exception]::new("An unexpected error occurred: $_")
+    }
     catch {
         if($null -ne $_.ErrorDetails) {
             if(($_.ErrorDetails | ConvertFrom-Json).error.message -like "*maximum context length*") {

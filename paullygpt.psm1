@@ -656,6 +656,7 @@ function Invoke-PaullyGPTCommand {
                     }
                 }
             }
+            $myprompt = $null
             break
         }
         { $mycommand -like "exit*" } {
