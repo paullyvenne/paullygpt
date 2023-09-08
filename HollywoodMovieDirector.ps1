@@ -6,12 +6,13 @@ Import-Module .\PromptInteractionModule.psm1
 Import-Module .\SpecialFXModule.psm1
 Import-Module .\PaullyGPT.psm1
 
-#NOTICE: This is just a example of the cognitive abilities of GPT tailored to a specific fan scenario, 
-#in this case the 1980s Lucasfilm golden era Indiana Jones. The above example are not intended as any claim on the intellectual property 
-#of the Indiana Jones owners of or intended to be used for any commercial purposes but merely educational and learning purposes.
+#NOTICE: This is just a example of the cognitive abilities of GPT tailored to a specific fan scenario. 
+#The above example are not intended as any claim on the intellectual property  of the  owners of or 
+#intended to be used for any commercial purposes but merely educational and learning purposes.
 
-$global:DEBUG = $false
-$global:MaxTokens = 500
+$global:DEBUG = $true
+$global:Model =  "gpt-3.5-turbo-16k" ##"gpt-4"
+$global:MaxTokens = 250
 $global:Temperature = 0.9
 $global:MaxCompletionLoop = 5
 $global:MaxExceptionLoop = 5
@@ -31,7 +32,7 @@ $global:MaxExceptionLoop = 5
 #     PlayNote -Frequency $cFrequency -Duration $halfDuration
 # }
 
-$firstPrompt = "With flair start the introduction about our text game, Hollywood Movie Director, then some imaginary movies to direct with hilarious names and descriptions."
+$firstPrompt = "With flair start the introduction about our text game, Hollywood Movie Director, then some imaginary movies to direct with outrageous names and descriptions."
 #OPTIMIZED VERSION OF THE ABOVE - COMPACTED AND SUMMARIZED
 #------------------------------------------------------------------------------------------------------------#
 #
@@ -41,7 +42,8 @@ $firstPrompt = "With flair start the introduction about our text game, Hollywood
 $directives = "Try to keep prompts under 1000 characters. First the users to choose an movie first.
 Prepare a choice of 3 unique base script titles, with suggested detailed choices such as  default genre, locations, scene variety, period, plots, climax,scene editing, special fx, twists, villians, and/or sidekicks that will be kept or changed by me. The game should be a choose-your-own-adventure text game based on the making a Hollywood movie theme, inspired by the Steven Spielburg.
 Start the game as an upcoming Director, daydreaming at my desk in Hollywood. Notice letters on my desk, each representing a different script option and each when chosen have a written letter that you will write in quotes containing some correspondence to Steven. Each character should possess special skills and items that can affect the path and outcome of the game, they can also have inspiration from hollywood movies.
-Once an base script is chosen, you as the director's smart but hilarious assistant, will ask me to go over all the major details if I want to override any of the base details, suggest up to 5 choices for the player or ask for me to enter others. These choices may include one that benefits from and include an option for looking around for clues that slowly lead to the right choice.
+Keep mentioning famous quotes from hollywood movie makers about the art.
+Once an base script is chosen, you as the director's nerdy assistant, will ask me to go over all the major details if I want to override any of the base details, suggest up to 5 choices for the player or ask for me to enter others. These choices may include one that benefits from and include an option for looking around for clues that slowly lead to the right choice.
 Mainly you will be making a movie using numbered options (which have some cost in money or risk) but sometimes I will be making text choices too like for naming or renaming scripts.
 You will also encounter on-set mishaps and accidents and be able to do order retakes in my option. I can also change the script after hearing the actor or actress say it to me. I will be able to give them advice as well to improve the scene.
 It should feel like I are making my own story, be it love, sci-fi, action, or comedy, 
@@ -56,4 +58,4 @@ Introduce the game's rules, objective, and background story. Ensure the followin
 10) The movie studio directors have to like the preview scripts each chapter for more funding of the entire movie or next."
 
 #PlayHollywoodMelody
-Invoke_PaullyGPT_V1 -Directives $directives -FirstPrompt $firstPrompt -ResumeLastSession $true -SaveSession $true -SessionFile "HollywoodMovieDirector.json"
+Invoke_PaullyGPT_V1 -Directives $directives -FirstPrompt $firstPrompt -ResumeLastSession $true -SaveSession $true -SessionFile "HollywoodMovieDirector.json" -MaxTokens 250
