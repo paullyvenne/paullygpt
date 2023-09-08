@@ -11,7 +11,7 @@ Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to en
 * [Paullygpt.ps1](https://github.com/paullyvenne/paullygpt/blob/main/paullygpt.ps1) - Primary script to run PaullyGPT in Minimalistic Mode
 * [IndyGPT.ps1](https://github.com/paullyvenne/paullygpt/blob/main/IndyGPT.ps1) - An example of PaullyGPT module with text-adventure directives.
 * [HollywoodMovieDirector.ps1](https://github.com/paullyvenne/paullygpt/blob/main/HollywoodMovieDirector.ps1) - Another example of PaullyGPT module with text-adventure directives.
-* or type Import-Module .\\[PaullyGPT.psm1](https://github.com/paullyvenne/paullygpt/blob/main/PaullyGPT.psm1) to make Yo_Paully available in the PowerShell terminal.
+* or type Import-Module .\\[PaullyGPT.psm1](https://github.com/paullyvenne/paullygpt/blob/main/paullygpt.psm1) to make Yo_Paully available in the PowerShell terminal.
 
 ## PaullyGPT Features
 * A lightning-fast and user-friendly ChatGPT experience in the convenience of a PowerShell or VSCODE Terminal with PS extensions.
