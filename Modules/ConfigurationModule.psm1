@@ -22,7 +22,7 @@ function Get-PaullyGPTConfig {
     # LearnFromSourceGPT -Source $readme -Contents $fileContents -analyzeContents $true
 
     # Create the "paullygpt" folder if it doesn't exist
-    $paullyGptFolderPath = Join-Path $PSScriptRoot "paullygpt"
+    $paullyGptFolderPath = Join-Path $PSScriptRoot "..\paullygpt"
     if (-not (Test-Path -Path $paullyGptFolderPath -PathType Container)) {
         New-Item -ItemType Directory -Path $paullyGptFolderPath -Force
     }
