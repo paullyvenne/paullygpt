@@ -1,4 +1,4 @@
-Import-Module .\PromptInteractionModule.psm1
+Import-Module .\Modules\PromptInteractionModule.psm1
 
 $value = Read-FromInputBox
 $value

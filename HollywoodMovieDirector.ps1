@@ -1,10 +1,10 @@
-Import-Module .\ConfigurationModule.psm1
-Import-Module .\OpenAIModule.psm1
-Import-Module .\SpeechSynthesisModule.psm1
-Import-Module .\SVGModule.psm1
-Import-Module .\PromptInteractionModule.psm1
-Import-Module .\SpecialFXModule.psm1
-Import-Module .\PaullyGPT.psm1
+Import-Module .\Modules\ConfigurationModule.psm1
+Import-Module .\Modules\OpenAIModule.psm1
+Import-Module .\Modules\SpeechSynthesisModule.psm1
+Import-Module .\Modules\SVGModule.psm1
+Import-Module .\Modules\PromptInteractionModule.psm1
+Import-Module .\Modules\SpecialFXModule.psm1
+Import-Module .\Modules\PaullyGPT.psm1
 
 #NOTICE: This is just a example of the cognitive abilities of GPT tailored to a specific fan scenario. 
 #The above example are not intended as any claim on the intellectual property  of the  owners of or 

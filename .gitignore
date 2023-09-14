@@ -3,7 +3,14 @@
 ################################################################################
 
 /paullygpt
+/backup
 /paullygptx
 /.vs
+/.vscode
 /paullygpt.config.json
 /paullygpt2.ps1
+5
+output.svg
+launch.json
+notes3.md
+paullygpt.config.json

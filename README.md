@@ -46,12 +46,12 @@ Introducing PaullyGPT, an exceptional ChatGPT client meticulously designed to en
 
 ## Easy to Configure and Customize Behavior
 ```powershell
-Import-Module .\ConfigurationModule.psm1
-Import-Module .\OpenAIModule.psm1
-Import-Module .\SpeechSynthesisModule.psm1
-Import-Module .\SVGModule.psm1
-Import-Module .\PromptInteractionModule.psm1
-IMport-Module .\SpecialFXModule.psm1
+Import-Module .\Modules\ConfigurationModule.psm1
+Import-Module .\Modules\OpenAIModule.psm1
+Import-Module .\Modules\SpeechSynthesisModule.psm1
+Import-Module .\Modules\SVGModule.psm1
+Import-Module .\Modules\PromptInteractionModule.psm1
+IMport-Module .\Modules\SpecialFXModule.psm1
 
 # Define the global variables
 $global:DefaultAPIKey = "YOUR_API_KEY_HERE"

@@ -3,16 +3,16 @@
 # $window = Invoke-PaullyGPTGUI
 # #--------------------------------------------------------------------------------------------#
 
-Import-Module .\ConfigurationModule.psm1
-Import-Module .\OpenAIModule.psm1
-Import-Module .\SpeechSynthesisModule.psm1
-Import-Module .\SVGModule.psm1
-Import-Module .\PromptInteractionModule.psm1
-Import-Module .\SpecialFXModule.psm1
+Import-Module .\Modules\ConfigurationModule.psm1
+Import-Module .\Modules\OpenAIModule.psm1
+Import-Module .\Modules\SpeechSynthesisModule.psm1
+Import-Module .\Modules\SVGModule.psm1
+Import-Module .\Modules\PromptInteractionModule.psm1
+Import-Module .\Modules\SpecialFXModule.psm1
 # Import-Module .\StorageAccountModule.psm1
-Import-Module .\UIModule.psm1
-Import-Module .\PaullyGPT.psm1
-Import-Module .\PaullyGPT-GUI.psm1
+Import-Module .\Modules\UIModule.psm1
+Import-Module .\Modules\PaullyGPT.psm1
+Import-Module .\Modules\PaullyGPT-GUI.psm1
 
 $ErrorActionPreference = "stop"
 $result = Invoke-PaullyGPTGUI

@@ -1,15 +1,15 @@
-Import-Module .\ConfigurationModule.psm1
-Import-Module .\OpenAIModule.psm1
-Import-Module .\SpeechSynthesisModule.psm1
-Import-Module .\SVGModule.psm1
-Import-Module .\PromptInteractionModule.psm1
-Import-Module .\SpecialFXModule.psm1
+Import-Module .\Modules\ConfigurationModule.psm1
+Import-Module .\Modules\OpenAIModule.psm1
+Import-Module .\Modules\SpeechSynthesisModule.psm1
+Import-Module .\Modules\SVGModule.psm1
+Import-Module .\Modules\PromptInteractionModule.psm1
+Import-Module .\Modules\SpecialFXModule.psm1
 # Import-Module .\StorageAccountModule.psm1
 # Import-Module .\UIModule.psm1
 # Import the HTML Agility Pack module
 # Import-Module -Name HtmlAgilityPack
 
-$global:version = "1.0.16"
+$global:version = "1.0.17"
 $global:DEBUG = $false
 
 # Define the global variables
@@ -719,18 +719,18 @@ function LearnFromSourceGPT {
     return $analysis
 }
 
-function ExtractHtmlInnerText {
-    param (
-        [string] $htmlText
-    )
-    $html = New-Object -ComObject "HTMLFile"
-    $rawbytes = [System.Text.Encoding]::UTF8.GetBytes($htmlText)
-    $html.write($rawbytes)
-    $bytes = [System.Text.Encoding]::UTF8.GetBytes($html.body.innerText)
-    $filteredBytes = $bytes | Where-Object { $_ -lt 128 -or $_ -ge 192 }
-    $utf8String = [System.Text.Encoding]::UTF8.GetString($filteredBytes)
-    return $utf8String
-}
+# function ExtractHtmlInnerText {
+#     param (
+#         [string] $htmlText
+#     )
+#     $html = New-Object -ComObject "HTMLFile"
+#     $rawbytes = [System.Text.Encoding]::UTF8.GetBytes($htmlText)
+#     $html.write($rawbytes)
+#     $bytes = [System.Text.Encoding]::UTF8.GetBytes($html.body.innerText)
+#     $filteredBytes = $bytes | Where-Object { $_ -lt 128 -or $_ -ge 192 }
+#     $utf8String = [System.Text.Encoding]::UTF8.GetString($filteredBytes)
+#     return $utf8String
+# }
 
 function Pop_History {
     Param(

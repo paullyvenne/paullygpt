@@ -148,7 +148,7 @@ function Send-OpenAICompletion {
                     #Write-Host "$reason : $added`nStill thinking..." -ForegroundColor Yellow
                     $output += Send-OpenAICompletion -Prompt "continue" -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $APIKey -SavePrompt $false -SaveReponse $true -MaxCompletionLoop ($MaxCompletionLoop-1) -MaxExceptionLoop $MaxExceptionLoop                   
                 }
-                return $output
+                return $output  
             }
         }
         else {
@@ -333,19 +333,54 @@ function Get-OpenAICompletion {
     }
 
     $result = Send-OpenAICompletion -Prompt $Prompt -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $apiKey -SavePrompt $SavePrompt -SaveResponse $SaveResponse
-    $isSVG = $result -match "(?s)<svg.*?</svg>"
+    #$isSVG = $result -match "(?s)<svg.*?</svg>"
     #i want to refactor the if below to properly check for null or empty svgmarkup
-    if ($isSVG -eq $true) {
-        $svgMarkup = $matches[0]
-        $result = $result.Replace($svgMarkup, "[See Visual Output]")
-        Update-SVG -SVGMarkup $svgMarkup -Title "Paully GPT" 
-    }
 
+    # if($null -ne $result) {
+    #     $codeBlocks = Extract_CodeBlocks $result -Type "svg"
+    #     if ($codeBlocks.Count -gt 0) {
+    #         $svgMarkup = $codeBlocks[0].Code
+    #         Update-SVG -SVGMarkup $svgMarkup -Title "Paully GPT"
+    #         $result = $result.Replace($svgMarkup, "[See Visual Output]")
+    #     }
+    # }
+    
     #Clean Up
-    $filteredArray = $global:ChatHistory | Where-Object { $_.role -ne "user" -or !$_.content.StartsWith($hash) }
-    $global:ChatHistory = $filteredArray
+    #does this event work?
+    #yes, but it's not needed.
+    # $filteredArray = $global:ChatHistory | Where-Object { $_.role -ne "user" -or !$_.content.StartsWith($hash) }
+    # $global:ChatHistory = $filteredArray
+    
     return $result
 }
+
+# Define the function to extract code blocks from a string
+function Extract_CodeBlocks {
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]$text,
+        [string]$Type = $null
+    )
+
+    # Define the regular expression pattern to match code blocks and their types
+    $pattern = "(?ms)```([\w\s]+)(.*?)````"
+
+    # Extract code blocks and their types using the regular expression pattern
+    $matches = $text | Select-String -Pattern $pattern -AllMatches |
+        ForEach-Object {
+            $type = $_.Matches.Groups[1].Value.Trim()
+            $code = $_.Matches.Groups[2].Value.Trim()
+            if($Type -eq $null -or $type -eq $Type) {
+                [PSCustomObject]@{
+                    Type = $type
+                    Code = $code
+                }
+            }
+        }
+    # Return the extracted code blocks and their types
+    return $matches
+}
+
 function Reset-GPT {
     param(
         [string]$Directive

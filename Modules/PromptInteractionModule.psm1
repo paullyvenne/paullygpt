@@ -4,7 +4,7 @@ using namespace System.Drawing
 # Load the System.Windows.Forms assembly
 # which implicitly loads System.Drawing too.
 Add-Type -AssemblyName System.Windows.Forms
-Import-Module .\OpenAIModule.psm1
+Import-Module .\Modules\OpenAIModule.psm1
 
 $global:speechEnabled = $true
 $enterMode = $true
