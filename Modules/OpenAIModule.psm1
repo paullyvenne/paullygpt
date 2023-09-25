@@ -155,26 +155,17 @@ function Send-OpenAICompletion {
             throw [System.Exception]::new("An unexpected error occurred. The response was null.")
         }
     }
-    catch [System.Net.WebException] {
-        Write-Host "An error occurred: $($_.Exception.ToString())" -ForegroundColor Red
-        $httpResponse = $_.Exception.Response
-        if ($httpResponse -and $httpResponse.StatusCode -eq "BadRequest") {
-            if ($MaxExceptionLoop -gt 0) {
-                Write-Host "." -NoNewline -ForegroundColor Red
-                $global:ChatHistory = Optimize_MessageTokens -Messages $global:ChatHistory -MaxCompletionTokenSize $MaxTokens 
-                $output = Send-OpenAICompletion -Prompt "" -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $APIKey -SavePrompt $SavePrompt -SaveReponse $saveResponse -MaxCompletionLoop $MaxCompletionLoop -MaxExceptionLoop ($MaxExceptionLoop-1)                       
-            }
-        }
-        throw [System.Exception]::new("An unexpected error occurred: $_")
-    }
     catch {
         if($null -ne $_.ErrorDetails) {
-            if(($_.ErrorDetails | ConvertFrom-Json).error.message -like "*maximum context length*") {
+            if(($_.ErrorDetails | ConvertFrom-Json).error.code -eq "context_length_exceeded") {
                 if ($MaxExceptionLoop -gt 0) {
                     Write-Host "." -NoNewline -ForegroundColor Red
                     $global:ChatHistory = Optimize_MessageTokens -Messages $global:ChatHistory -MaxCompletionTokenSize $MaxTokens 
                     Start-Sleep -Milliseconds 500
                     return Send-OpenAICompletion -Prompt "" -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $APIKey -SavePrompt $SavePrompt -SaveReponse $saveResponse -MaxCompletionLoop $MaxCompletionLoop -MaxExceptionLoop ($MaxExceptionLoop-1)                       
+                } else {
+                    $errorMsg = ($_.ErrorDetails | ConvertFrom-Json).error.message
+                    throw [System.Exception]::new("An unexpected network error occurred. $errorMsg")
                 }
             }
         }
@@ -185,135 +176,11 @@ function Send-OpenAICompletion {
                 Write-Host ($_.ErrorDetails.Message | ConvertFrom-Json).error.message -ForegroundColor Red
             }
         }
-        Write-Host "An error occurred: $($_.Exception.ToString())" -ForegroundColor Red
+        Write-Host "An unexpected error occurred: $($_.Exception.ToString())" -ForegroundColor Red
     }
     return $null
 }
-# function Send-OpenAICompletion3 {
-#     param (
-#         [string]$Prompt,
-#         [int]$MaxTokens = 500,
-#         [double]$Temperature = 0.8,
-#         [string]$APIKey,
-#         [bool]$savePrompt = $true
-#     )
 
-#     $newMessage = @{
-#         role    = "user"
-#         content = $Prompt
-#     }
-
-#     $global:ChatHistory +#= $newMessage 
-#     $body = @{
-#         model       = $global:Model
-#         messages    = $global:ChatHistory
-#         temperature = $Temperature
-#         max_tokens  = $MaxTokens
-#         n           = 1
-#         stop        = $null
-#     } | ConvertTo-Json -Depth 5 -Compress
-
-#     $headers = @{
-#         "Content-Type"  = "application/json"
-#         "Authorization" = "Bearer $APIKey"
-#     }
-
-#     $param = @{
-#         Uri     = "https://api.openai.com/v1/chat/completions"
-#         Headers = $headers
-#         Method  = "Post"
-#         Body    = $body
-#     }
-
-#     try {
-#         $response = Invoke-RestMethod @param
-#         if ($null -ne $response) {
-#             if ($null -ne $response.error) {
-#                 throw [System.Exception]::new($response.error.message)
-#             }
-#             else {
-#                 return $response.choices[0].message.content
-#             }
-#         }
-#         else {
-#             throw [System.Exception]::new("An unexpected error occurred. The response was null.")
-#         }
-#     }
-#     catch {
-#         if($true -eq $global:DEBUG) {
-#             Write-Host "An error occurred: $_" -ForegroundColor Red
-#             Write-Host ($param) -ForegroundColor Yellow
-#         } else {
-#             Write-Host "An error occurred: $($_.Exception.ToString())" -ForegroundColor Red
-#         }
-#         return $null
-#     }
-# }
-# function Send-OpenAICompletion2 {
-#     param (
-#         [string]$Prompt,
-#         [int]$MaxTokens = 500,
-#         [double]$Temperature = 0.8,
-#         [string]$APIKey,
-#         [switch]$Paginate
-#     )
-
-#     $body = @{
-#         model       = $global:Model
-#         messages    = $global:ChatHistory
-#         temperature = $Temperature
-#         max_tokens  = $MaxTokens
-#         n           = 1
-#         stop        = $null
-#     } | ConvertTo-Json -Depth 5 -Compress
-
-#     $headers = @{
-#         "Content-Type"  = "application/json"
-#         "Authorization" = "Bearer $APIKey"
-#     }
-
-#     $param = @{
-#         Uri     = "https://api.openai.com/v1/chat/completions"
-#         Headers = $headers
-#         Method  = "Post"
-#         Body    = $body
-#     }
-
-#     $result = @()
-
-#     do {
-#         try {
-#             $response = Invoke-RestMethod @param
-#             if ($null -ne $response) {
-#                 if ($null -ne $response.error) {
-#                     throw [System.Exception]::new($response.error.message)
-#                 }
-#                 else {
-#                     $result += $response.choices[0].message.content
-
-#                     if ($Paginate -and $response.choices[0].finish_reason -ne 'stop') {
-#                         $newResult = Send-OpenAICompletion -Prompt $Prompt -MaxTokens $MaxTokens -Temperature $Temperature -APIKey $APIKey -Paginate
-#                         if ($null -ne $newResult) {
-#                             $result += $newResult
-#                         }
-#                     }
-#                     else {
-#                         break
-#                     }
-#                 }
-#             }
-#             else {
-#                 throw [System.Exception]::new("An unexpected error occurred. The response was null.")
-#             }
-#         }
-#         catch {
-#             Write-Host "An error occurred: $($_.Exception.Message)" -ForegroundColor Red
-#             Exit 1
-#         }
-#     } until (!$Paginate)
-
-#     return $result -join ' '
-# }
 function Get-OpenAICompletion {
     param (
         [string]$Prompt,

@@ -151,19 +151,8 @@ function Invoke_PaullyGPT_V1 {
 
         # Display Artificial Entity's Properties
         Write-Host " $spaces~~=(Conjuring Artificial Entity)=~~" -NoNewline -ForegroundColor Yellow 
-        # [console]::beep(400, 500)
-        # Start-Sleep -Milliseconds 100
-        # [console]::beep(500, 500)
-        # Start-Sleep -Milliseconds 20
-        # [console]::beep(600, 500)
-        # Start-Sleep -Milliseconds 40
-        # [console]::beep(500, 500)
-        # Start-Sleep -Milliseconds 80
-        # [console]::beep(400, 500)
-        # $aboutme = Get-CurrentAgent #Returns object
-        # Write-Host $aboutme -ForegroundColor Cyan
     }
-    else {
+        else {
         $global:speechEnabled = ($IsCLI -eq $false)
     }
 
@@ -183,8 +172,6 @@ function Invoke_PaullyGPT_V1 {
         $myprompt = $FirstPrompt
     }
     
-
-
 
 
     # foreach ($line in $starLines) {
@@ -390,7 +377,7 @@ function Save_Summary {
     # $summary = Summarize_Conversation
     # $summary | Out-File -FilePath $fullPath -Encoding UTF8 -Force!me
     # $summary | Out-File -FilePath $lastPath -Encoding UTF8 -Force
-    $global:ChatHistory | ConvertTo-Json | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
+    $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
     $summary = "Saved memories to $lastPathJson."
     if($IsCLI -eq $false) {
         Write-Host $summary -ForegroundColor Green
@@ -415,8 +402,7 @@ function Invoke-PaullyGPTCommand {
     switch ($mycommand) {
 
         { $mycommand -like "help*" } { 
-            Write-Host "Commands: !help, !aboutme, !history, !memorize [optional file], !recall, !pop [count], !remove [index], !clear [newdirective], !load [filename], !exit" -ForegroundColor Green
-            Write-Host "Coming Soon: !savecode, !ls" -ForegroundColor Green
+            Write-Host "Commands: !help, !aboutme, !history, !memorize[: optional file], !recall, !pop[: count], !remove[: index], !clear[: newdirective], !load[: filename], !qload[: filename], !exit" -ForegroundColor Green
             break 
         }
 
@@ -501,8 +487,8 @@ function Invoke-PaullyGPTCommand {
 
                 $directory = ".\paullygpt\"
                 $lastPathJson = $directory + $supportFile
-                $global:ChatHistory | ConvertTo-Json | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
-                $global:ChatHistory | ConvertTo-Json | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
+                $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
+                $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
                 
                 $msg = ""
                 if ($global:ChatHistory.Count -gt 0) {
@@ -588,6 +574,42 @@ function Invoke-PaullyGPTCommand {
             }
             break
         }
+
+        { $mycommand -like "qload:*" } {
+            $param = ($mycommand -replace "qload:", "").Trim()
+            try {
+                if (Test-Path $param) {
+                    $content = Get-Content -Path $param -TotalCount 1
+                    $size = (Get-Item $param).Length / 1KB  #
+                    if ($size -gt $global:fileSizeLimit) {
+                        Write-Host "The file size is larger than limit: $global:fileSizeLimit kb."
+                    }
+                    else {
+                        if ($content -match "[^\x20-\x7E]") {
+                            Write-Host "Cannot load binary files." -ForegroundColor Red
+                        }
+                        else {
+                            if ($IsCLI -eq $false) {
+                                Write-Host "Loading File...$param" -ForegroundColor Green
+                            }
+                            $fileContents = (Get-Content $param) | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
+                            $analysis = LearnFromSourceGPT -Source $param -Contents $fileContents -analyzeContents $false -IsCLI $IsCLI
+                            if ($IsCLI -eq $true) {
+                                return $analysis
+                            }
+                            SpeakAsync $analysis
+                            return $null
+                        }
+                    }
+                }
+            }
+            catch {
+                Write-Host "Error: Failed to retrieve file content for $param. $_" -ForegroundColor Red
+                Pop_History
+            }
+            break
+        }
+
         { $mycommand -like "load:*" } {
             $param = ($mycommand -replace "load:", "").Trim()
             try {
