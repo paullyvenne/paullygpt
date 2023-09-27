@@ -193,6 +193,9 @@ function Invoke_PaullyGPT_V1 {
             $mycommand = [string]::new($myprompt).Substring(1, $myprompt.Length - 1).Trim()
             Write-Host "`n" -NoNewline
             $myprompt = Invoke-PaullyGPTCommand -Command $mycommand -Directives $Directives -IsCLI $IsCLI -SaveLastSession $SaveLastSession 
+            if($myprompt.Length -gt 0 -and $myprompt[0] -eq $null) {
+                $myprompt = $null
+            }
         }
 
         #(!$myprompt.StartsWith("!")) -and 
@@ -213,12 +216,10 @@ function Invoke_PaullyGPT_V1 {
             else {
                 $answer = $global:ChatHistory[$global:ChatHistory.Count - 1].Content
             }
-
-
             return $answer
         }
         else {
-            if ($null -ne $myprompt -and -not ($myprompt -like "`n*")) {
+            if ((-not [string]::IsNullOrEmpty($myprompt)) -and (-not ($myprompt -like "`n*"))) {
                 $startTime = Get-Date
                 $answer = Get-GPT $myprompt  
 
@@ -402,7 +403,7 @@ function Invoke-PaullyGPTCommand {
     switch ($mycommand) {
 
         { $mycommand -like "help*" } { 
-            Write-Host "Commands: !help, !aboutme, !history, !memorize[: optional file], !recall, !pop[: count], !remove[: index], !clear[: newdirective], !load[: filename], !qload[: filename], !exit" -ForegroundColor Green
+            Write-Host "Commands: !help, !aboutme, !history, !memorize[: optional file], !recall, !pop[: count], !remove[: index], !clear, !reset[: newdirective], !load[: filename], !qload[: filename], !exit" -ForegroundColor Green
             break 
         }
 
@@ -487,9 +488,12 @@ function Invoke-PaullyGPTCommand {
 
                 $directory = ".\paullygpt\"
                 $lastPathJson = $directory + $supportFile
-                $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
+                try {
+                    $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $transcriptPath3 -Encoding UTF8 -Force
+                } Catch {}
+                try {
                 $global:ChatHistory | ConvertTo-Json -Depth 5 -Compress | Out-File -FilePath $lastPathJson -Encoding UTF8 -Force
-                
+                } Catch {}
                 $msg = ""
                 if ($global:ChatHistory.Count -gt 0) {
                     foreach ($message in $global:ChatHistory) {
@@ -559,7 +563,7 @@ function Invoke-PaullyGPTCommand {
                     }
                     else {
                         if ($null -ne $urlContents -and $urlContents.Length -gt 0) {
-                            $analysis = LearnFromSourceGPT -Source $url -Contents $urlContents -analyzeContents $true -IsCLI $IsCLI
+                            $analysis = LearnFromSourceGPT -Source $null -Contents $urlContents -analyzeContents $true -IsCLI $IsCLI
                             if ($IsCLI -eq $true) {
                                 return $analysis
                             }
@@ -590,15 +594,19 @@ function Invoke-PaullyGPTCommand {
                         }
                         else {
                             if ($IsCLI -eq $false) {
-                                Write-Host "Loading File...$param" -ForegroundColor Green
+                                Write-Host "Loading File...$param..." -ForegroundColor Green -NoNewline
                             }
                             $fileContents = (Get-Content $param) | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
-                            $analysis = LearnFromSourceGPT -Source $param -Contents $fileContents -analyzeContents $false -IsCLI $IsCLI
+                            Write-Host "Done." -ForegroundColor Green
+                            #$analysis = LearnFromSourceGPT -Source $param -Contents $fileContents -analyzeContents $false -IsCLI $IsCLI
+                            $encoded_contents = $fileContents | ConvertTo-Json
+                            $hash = Get-SHA1Hash -String $encoded_contents
+                            $analysis = "Remember snippet '$hash' from source '$param' contains : ``````$encoded_contents``````"
+                            Append_Message -Role "assistant" -Prompt $analysis
                             if ($IsCLI -eq $true) {
                                 return $analysis
                             }
-                            SpeakAsync $analysis
-                            return $null
+                            $myprompt = $null
                         }
                     }
                 }
@@ -625,9 +633,10 @@ function Invoke-PaullyGPTCommand {
                         }
                         else {
                             if ($IsCLI -eq $false) {
-                                Write-Host "Loading File...$param" -ForegroundColor Green
+                                Write-Host "Loading File...$param..." -ForegroundColor Green -NoNewline
                             }
                             $fileContents = (Get-Content $param) | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
+                            Write-Host "Done." -ForegroundColor Green
                             $analysis = LearnFromSourceGPT -Source $param -Contents $fileContents -analyzeContents $true -IsCLI $IsCLI
                             if ($IsCLI -eq $true) {
                                 return $analysis
@@ -644,38 +653,40 @@ function Invoke-PaullyGPTCommand {
             break
         }
         
-        { $mycommand -like "clear*" -or $mycommand -like "reset*" } {
-            if ($mycommand -like "clear*") {
-                $directive = ($mycommand -replace "clear", "").Trim()
-            }
-            if ($mycommand -like "reset*") {
+        { $mycommand -like "reset:*" } {
+            if ($mycommand -like "reset:*") {
                 $directive = ($mycommand -replace "reset", "").Trim()
             }
             $confirmation = "Y"
-            if ($false -eq [string]::IsNullOrEmpty($directive)) { 
-                if ($IsCLI -eq $false) {
-                    $confirmation = Read-Host "Are you sure you want to clear history and reset directives? (Y/N)"
-                }
-                if ($confirmation -eq "Y") {
-                    Reset-GPT $directive
-                    if ($IsCLI -eq $true) {
-                        return ("Reset to: `n$directive")
-                    }
-                    Write-Host "Reset to: `n$directive" -ForegroundColor Green
-                }
+            if ($IsCLI -eq $false) {
+                $confirmation = Read-Host "Are you sure you want to clear history and reset directives? (Y/N)"
             }
-            else {
-                if ($IsCLI -eq $false) {
-                    $confirmation = Read-Host "Are you sure you want to clear history? (Y/N)"
+            if ($confirmation -eq "Y") {
+                Reset-GPT $directive
+                if ($IsCLI -eq $true) {
+                    return ("Reset to: `n$directive")
                 }
-                if ($confirmation -eq "Y") {
-                    if ($global:ChatHistory.Length -gt 0) {
-                        Reset-GPT $Directives
-                        if ($IsCLI -eq $true) {
-                            #return "Cleared!"
-                        }
-                        Write-Host "Cleared!" -ForegroundColor Green
+                Write-Host "Reset to: `n$directive" -ForegroundColor Green
+            }
+            $myprompt = $null
+            break
+        }
+
+        { $mycommand -like "clear*" } {
+            if ($mycommand -like "clear*") {
+                $directive = ($mycommand -replace "clear", "").Trim()
+            }
+            $confirmation = "Y"
+            if ($IsCLI -eq $false) {
+                $confirmation = Read-Host "Are you sure you want to clear history? (Y/N)"
+            }
+            if ($confirmation -eq "Y") {
+                if ($global:ChatHistory.Length -gt 0) {
+                    $global:ChatHistory = @($global:ChatHistory[0])
+                    if ($IsCLI -eq $true) {
+                        #return "Cleared!"
                     }
+                    Write-Host "Cleared!" -ForegroundColor Green
                 }
             }
             $myprompt = $null
@@ -694,35 +705,40 @@ $global:dataSources = @{}
 
 function LearnFromSourceGPT {
     Param(
-        [string]$Source, 
         [string]$Contents,
+        [string]$Source = $null, 
         [bool]$AnalyzeContents = $true,
         [bool]$IsCLI = $false
     )
-
-    if ($true -eq [string]::isNullOrEmpty($Source)) {
-        throw "Source is required."
-    }
 
     if ($true -eq [string]::isNullOrEmpty($Contents)) {
         throw "Contents is required."
     }
 
     $backup = $global:ChatHistory.Clone()
-    $hash = [Guid]::NewGuid().ToString()
-        
+    
+    $encoded_contents = $Contents | ConvertTo-Json
+    $hash = Get-SHA1Hash -String $encoded_contents
     #q: not used yet?
 
-    $dataSources[$hash] = $Source.Trim()
-
-    $encoded_contents = $Contents | ConvertTo-Json
+    $target = "data with reference hash '$hash'"
+    #if source declared otherwise ignore
+    if($null -ne $Source) {
+        $dataSources[$hash] = $Source.Trim()
+        $target += "from source '$Source'"
+    }
 
     if ($IsCLI -eq $false) {
         $startTime = Get-Date
         Write-Host "Analyzing..." -ForegroundColor Green
         $lastCount = $global:ChatHistory.Count
     }
-    $analysis = Get-GPT "Give me a compact detailed analysis of snippet '$hash' from source '$Source' which contains : ``````$encoded_contents``````"
+    
+    $analysis = Get-GPT "Without mentioning the reference hash, give me a compact detailed analysis of $target which contains : ``````$encoded_contents``````"
+    if($analysis -ne $null) {
+        $analysis = $analysis.Replace("data with reference hash '$hash'", "data")
+    }
+    
     if ($global:ChatHistory.Count -gt 0) {
         $filteredArray = $global:ChatHistory | Where-Object { $_.role -ne "user" -and !$_.content.StartsWith($hash) }
         $global:ChatHistory = $filteredArray
@@ -741,18 +757,14 @@ function LearnFromSourceGPT {
     return $analysis
 }
 
-# function ExtractHtmlInnerText {
-#     param (
-#         [string] $htmlText
-#     )
-#     $html = New-Object -ComObject "HTMLFile"
-#     $rawbytes = [System.Text.Encoding]::UTF8.GetBytes($htmlText)
-#     $html.write($rawbytes)
-#     $bytes = [System.Text.Encoding]::UTF8.GetBytes($html.body.innerText)
-#     $filteredBytes = $bytes | Where-Object { $_ -lt 128 -or $_ -ge 192 }
-#     $utf8String = [System.Text.Encoding]::UTF8.GetString($filteredBytes)
-#     return $utf8String
-# }
+function ExtractHtmlInnerText {
+    param (
+        [string]$htmlText
+    )
+    $decodedHtml = [System.Net.WebUtility]::HtmlDecode($htmlText)
+    $innerText = ($decodedHtml -split '<[^>]+>' | Where-Object { $_.Trim() -ne "" }) -join " "
+    return $innerText
+}
 
 function Pop_History {
     Param(
@@ -777,4 +789,19 @@ function Pop_Oldest {
     #$first = $global:ChatHistory[1]
     $global:ChatHistory = @($oldestMessage) + ($global:ChatHistory | Select-Object -Skip ($PopCount + 1))
     return $global:ChatHistory
+}
+
+
+function Get-SHA1Hash {
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]$String
+    )
+
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($String)
+    $sha1 = New-Object -TypeName System.Security.Cryptography.SHA1CryptoServiceProvider
+    $sha1HashBytes = $sha1.ComputeHash($bytes)
+    $sha1Hash = [System.BitConverter]::ToString($sha1HashBytes).Replace("-", "")
+
+    return $sha1Hash
 }

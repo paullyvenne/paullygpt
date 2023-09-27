@@ -262,6 +262,9 @@ function Get-GPT {
         [bool]$SaveResponse = $true
     )
     $completion = Get-OpenAICompletion -Prompt $Prompt -SavePrompt $SavePrompt -SaveResponse $SaveResponse -MaxTokens $global:MaxTokens
+    if($completion.Length -gt 0 -and $null -eq $completion[0]) {
+        return $completion[$completion.Length-1]
+    }
     return $completion
 }
 function Get-GPTQuiet {

@@ -24,7 +24,7 @@ $dayOfWeek = $dateTime.DayOfWeek`
 
 #MINIMALIST DIRECTIVE MODE
 $global:firstPrompt = $null #"Say hello, mention it's $timestamp, the day of the week is $dayOfWeek, please briefly introduce yourself, ask name, ask what areas 'do you need help with?', and follow with one empty lines and share an insightful quote based on your character."
-$global:directives = $null #"Be a helpful assistant and advisor running in a Powershell script coincidentally called PaullyGPT who can resume conversations with notes from previous sessions."
+$global:directives = "Be a helpful assistant and advisor running in a Powershell script coincidentally called PaullyGPT who can resume conversations with notes from previous sessions."
 Invoke_PaullyGPT_V1 -Directives $global:directives -FirstPrompt $global:firstPrompt -ResumeLastSession $true -SaveLastSession $true
 
 
